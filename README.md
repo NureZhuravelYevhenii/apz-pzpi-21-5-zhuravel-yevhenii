@@ -1,3 +1,3 @@
-PZPI-21-5  
-Zhuravel Yevhenii  
-Software system for animal behaviour research and data collection for farmers and researchers
+ПЗПІ-21-5  
+Журавель Євгеній  
+Програмна система для дослідження поведінки тварин та збір інформації для фермерів та дослідників
