@@ -1,495 +1,398 @@
-РОЗРОБКА BACK-END ЧАСТИНИ ПРОГРАМНОЇ СИСТЕМИ
+РОЗРОБКА FRONT-END ЧАСТИНИ ПРОГРАМНОЇ СИСТЕМИ
 
-МЕТА РОБОТИ
+Мета роботи:
+Покращити навички проектування програмних систем. Розробити front-end частину програмної системи та описати її з допомогою демонстраційного відеоролику, UML Use Case Diagram, UML Component Diagram, UML State Diagram та UML Package Diagram.
 
-Покращити навички проектування програмних систем. Розробити back-end частину програмної системи та описати її з допомогою демонстраційного відео, REST специфікації, UML Deployment diagram, UML Use Case diagram, ER-моделі даних та UML Package diagram.
-
-ХІД РОБОТИ
-
-Демо ролик проєкту доступний за посиланням (https://youtu.be/HyuXqLRw08I).
-Посилання на репозиторій програмної системи: https://github.com/NureZhuravelYevhenii/apz-pzpi-21-5-zhuravel-yevhenii.
+Хід роботи:
+Демо ролик проєкту доступний за посиланням (https://youtu.be/FSA4KRObn5w).
+Посилання на репозиторій програмної системи: https://github.com/NureZhuravelYevhenii/apz-pzpi-21-5-zhuravel-yevhenii .
 
 1 АРХІТЕКТУРА ТА ІНЖЕНЕРНІ РІШЕННЯ
-1.1 ОПИС СИСТЕМИ
 
-Серверна частина системи - це моноліт з No-sql базою даних MongoDb. Моноліт складається з трьох шарів: ui шар, що становить собою сервер обробки HTTP запитів, шар бізнес логіки, в якому знаходяться сервіси для вторинної обробки запитів та шар доступу до даних, що з допомогою зв'язування з базою даних дає можливість керувати даними.
+Front-end частина програмної системи реалізована з допомогою бібліотеки React та будівельника Vite. Ця частина складається з основних файлів, потрібних для роботи будівельника та сторінок, розділених по папкам, наприклад views, entity-pages, тощо, що реалізовані з допомогою функціональних компонентів бібліотеки React. Ці компоненти об’єднуються з допомогою react-router -dom, для підтримки переходу між сторінками.
 
-1.2	ШАР ОБРОБКИ ЗАПИТІВ 
+1.1	СТОРІНКИ СПИСКІВ 
 
-Написаний з допомогою технології ASP.NET Core, включає в себе контролери для обробки запитів пов'язаних з сутностями та з допомогою Chain of Responsibility реєструються методи, наприклад, для обробки помилок. Також в цьому шарі реєструються сервіси для Dependency Injection, для створення об'єктів класів ефективно. Є реєстрація пакетів локалізацій, що знаходяться в загальному шарі Core, що дає можливість доступу до нього з усіх шарів моноліту з уникненням циклічних залежностей.
+Ці сторінки використовуються для відображення конкретних сутностей. Вони зроблені по базовому формату: виклик useEffect для отримання даних, зберігання цих даних в масив та відображення їх з допомогою методу map в елементи html. Також присутні кнопки для повернення, створення та зміни елементів. В деяких сутностях є можливість перейти на сторінку деталей. 
 
-1.3	ШАР БІЗНЕС ЛОГІКИ
+1.2	СТОРІНКИ ДЕТАЛЕЙ СУТНОСТЕЙ
 
-Шар, що має в собі сервіси для обробки запитів по управлінню та отриманню сутностей. Більшість функціональності по управлінню сутностями описано в класі BaseCrudService, для уникнення дублювання коду, а для того, щоб програма відповідала принципу Solid Open-closed, методи, що можуть мати іншу реалізацію в класах наслідниках BaseCrudService, є віртуальними, для їх перевантаження. Для того, щоб користувач мав доступ лише до конкретних полей реальних сутностей бази даних, використовується mapping сутностей AutoMapper. Вся конфігурація для mapper описана в папці AutoMapper.
+Сторінки для відображеня деталей про сутності, наприклад в feeder details відображаються найпопулярніші дні тижня, місяця та сезони, а також показується розташування з допомогою бібліотеки роботи з картами. Для animal details відображається статистика по з’їденій їжі, а також, отримавши останні місця годування, відображає їх на карті, відсортувавши по даті.
 
-1.4	ШАР ДОСТУПУ ДО ДАНИХ
+1.3	ШАР З’ЄДНАННЯ З API
 
-Шар, що містить реалізацію патерну repository для драйверу MongoDb для .NET платформи, що інкапсулюють логіку управління та читання даних з MongoDb бази даних. Як і в попередньому шарі, більшість логіки описана в загальному класі BaseRepository, який використовує альтернативну версію декоратора сутностей у вигляді атрибутів, конкретно CollectionName, що дає можливість вказати назву колекції, до якої відноситься сутність, що забезпечує правильну роботу при використанні більшості сутностей.
+Шар, що містить створений та налаштований об’єкт axios, що додається бібліотекою axios, в якому реєструється interceptor для додавання токену доступу до кожного запиту, якщо користувач ввійшов (токен присутній в localstorage).
 
-1.5	ШАР ЗАГАЛЬНОЇ ФУНКЦІОНАЛЬНОСТІ
+1.4	ЛОКАЛІЗАЦІЯ
 
-Шар, що містить загальну функціональність, що може бути використана будь яким шаром. До неї відносяться загальні enum (Season, Month), кофнігурації, константи, локалізації, сервіси, що можуть бути використані в будь якому шарі (сервіс часу) та класи управління засобами метапрограмування платформи .NET Expression. З допомогою цих класів генеруються функції для керування станом сутностей, або отримання лямбда виразів для, наприклад, предикату пошуку сутності по ідентифікатору. Так як ці функції генеруються під час виконання програми, а також генеруються лише один раз, вони дозволяють не писати подібні функції вручну, що дозволяє уникнути великої кількості коду, що повторюється. Також в шарі доступу до даних, в реалізаціях патерну repository для конкретних сутностей, створені методи для агрегацій даних з бази даних, що дає можливість уникнути обробки великої кількості даних на стороні сервера, роблячи конкретні запити до бази даних. Наприклад так в AnimalFeederRepostory розраховуються найпопулярніші годівниці з допомогою групування записів по ідентифікатору годівниці та сортування результатів по спаданню кількості запитів. Подібні методи реалізовані і для AnimalRepository, AnimalTypeRepository, тощо.
+Локалізація реалізована з допомогою бібліотеки i18n та файлів локалізацій. Присутні українська та англійська локалізації.
 
-1.6 ЛОКАЛІЗАЦІЯ
+2	ДІАГРАМА КОМПОНЕНТ
 
-Локалізація реалізована з допомогою реалізації інтерфейсу IStringLocalizer в бібілотеці Microsoft.AspNetCore.Localization. Він реєструється в файлі Program.cs з допомогою методу розширення AddLocalization, та бере .resx файли ресурсів, що знаходяться в шарі загальної функціональності.
+Була створена діаграма компонентів (рис. 1), що показує як пов’язані сторінки сутностей з сервісами, та які елементи керування вони дають.
 
-1.7	ЗАГАЛЬНА ІНФОРМАЦІЯ
+3	ДІАГРАМА ПРЕЦЕДЕНТІВ
 
-Для більшості шарів створені бібліотеки інтерфейсів, що дають можливість відповідати принципу Solid Dependency Inversion, та залежати лише від абстракції, при цьому з можливістю заміни реалізації з допомогою налаштування стандартного контейнеру залежностей ASP.NET, чи контейнера бібліотеки AutoFac, що допомагає реєструвати сервіси ефективніше.
+Для розуміння ситуацій використання програмної системи була сформована діаграма прецедентів (додаток А).
+Система має три види користувачів: не зареєстрований користувач, зареєстрований користувач, годівниця.
 
-2 	СПЕЦИФІКАЦІЯ REST
+4	ДІАГРАМА ПАКЕТІВ
 
-В додатку А надана REST специфікація, що описує створений API шляхом надання інформації про кожен endpoint системи.
+Була створена діаграма пакетів front-end частини проєкту (рис. 2). Ця частина проєкту складається з таких пакетів як Components, Locales, EntityPages, froms, Views. Вся їх функціональність була описана в попередніх розділах, а залежності показані на рисунку 2.
 
-3	DEPLOYMENT DIAGRAM
+5	ДІАГРАМА СТАНІВ
 
-Було сформовано діаграму розгортання (рис. 1) для зображення елементів системи та їх зв’язку.
-Рисунок 1 - UML Deployment diagram
-Система складається з серверної частини, яка пов’язана з базою даних, та до якої звертаються web, mobile та Smart device частини проєкту, які для цього використовують протокол HTTP.
-
-4	USE CASE DIAGRAM
-
-Для розуміння ситуацій використання програмної системи була сформована Use Case diagram (рис. 2). 
-Рисунок 2 – Use Case diagram
-Система має два види користувачів: Зареєстрований користувач (є самим тваринним центром) та годівниця.
-
-5	ER-МОДЕЛЬ ДАНИХ
-
-Для показання зв’язку сутностей, що фігурують в системі, була створена ER-модель даних (рис. 3).
-Рисунок 3 – ER-модель даних
-AnimalCenter може мати нуль або безліч сенсорів (Sensor), годівниць (Feeder) та тварин (Animal), які в свою чергу пов’язані з своїми типами (SensorType, FeederType, AnimalType), або додатковими сутностями (GeoPoint). Також тварини та годівниці пов’язані сутністю AnimalFeeder зв’язком один до багатьох, яка зберігає інформацію про годування тварини в даній годівниці. Сенсори пов’язані відношенням один до багатьох з твариною, так як він закріпляється за нею.
-Була створена Package Diagram backend частини проєкту (рис. 4).
-Рисунок 4 - Package Diagram
-Back-end частина складається з модулю для роботи з базою даних (DAL), модулів для обробки даних (BLL та Adapters) та все це поєднується в модуль серверного застосунку (VetAuto). Додаткові функції та об’єкти знаходяться в модулі Core.
+Була стоврена діаграма станів (рис. 3), для відображення станів, в яких може бути застосунок.
 
 Висновки:
-Під час роботи над лабораторною роботою, я розробив back-end частину програмної системи та описав її з допомогою демонстраційного відео, UML Deployment diagram, UML Use Case diagram, ER-моделі даних та UML Package diagram.
+Під час виконання лабораторної роботи, я покращив навички проектування програмних систем, та розробив front-end частину програмної системи, описавши її з допомогою демонстраційного відеоролику, UML Use Case Diagram, UML Component Diagram, UML State Diagram та UML Package Diagram.
 
-ДОДАТОК А
+Додаток А
 
-REST специфікація
+Діаграма прецедентів
 
-Таблиця 1 – Специфікація REST API
-Шлях	Метод	Призначення
-/api/AnimalCenter/register	POST	Реєстрація в центрі тварин
-/api/AnimalCenter/login	POST	Вхід в центр тварин
-/api/AnimalCenter/refresh	POST	Оновлення токену доступу
-/api/AnimalCenter	POST	Додавання нового запису в центр тварин
-/api/AnimalCenter	GET	Отримання всіх записів в центрі тварин
-/api/AnimalCenter	DELETE	Видалення запису з центру тварин
-/api/AnimalCenter	PUT	Оновлення запису в центрі тварин
-/api/AnimalCenter/single	GET	Отримання деталей про одну певну тварину в центрі
-/api/Animals/create-animal-feeder	POST	Створення нового кормушки для тварини
-/api/Animals/feeding/{id}	GET	Отримання інформації про годування тварини
-/api/Animals/feeding-places/{id}	GET	Отримання місць годування для певної тварини
-/api/Animals/no-eat/{id}	GET	Отримання інформації про їжу, яку не їсть тварина
-/api/Animals/average-eaten-food/{id}	GET	Отримання середньої кількості спожитої їжі
-/api/Animals	POST	Додавання нової тварини
-/api/Animals	GET	Отримання всіх тварин
-/api/Animals	DELETE	Видалення тварини
-/api/Animals	PUT	Оновлення тварини
-/api/Animals/single	GET	Отримання деталей про одну певну тварину
-/api/animal-types/average-visited/{id}	GET	Отримання середньої кількості відвідувань
-/api/animal-types/feeders-visited-int-season/{id}	GET	Отримання інформації про кормушки, відвідані певним типом тварини в певний сезон
-/api/animal-types	GET	Отримання всіх типів тварин
-Продовження таблиці 1 – Специфікації REST API
-/api/animal-types	POST	Додавання нового типу тварини
-/api/animal-types	DELETE	Видалення типу тварини
-/api/animal-types	PUT	Оновлення типу тварини
-/api/animal-types/single	GET	Отримання деталей про один певний тип тварини
-/api/Feeders	POST	Створення нового кормушки
-/api/Feeders	GET	Отримання всіх кормушок
-/api/Feeders	DELETE	Видалення кормушки
-/api/Feeders	PUT	Оновлення кормушки
-/api/Feeders/popular	GET	Отримання популярних кормушок
-/api/Feeders/{id}/popular-season	GET	Отримання популярного сезону для кормушки
-/api/Feeders/{id}/popular-month	GET	Отримання популярного місяця для кормушки
-/api/Feeders/{id}/popular-day-of-week	GET	Отримання популярного дня тижня для кормушки
-/api/Feeders/single	GET	Отримання деталей про одну певну кормушку
-/api/Sensors	POST	Створення нового датчика
-/api/Sensors	GET	Отримання всіх датчиків
-/api/Sensors	DELETE	Видалення датчика
-/api/Sensors	PUT	Оновлення датчика
-/api/Sensors/single	GET	Отримання деталей про один певний датчик
-/api/sensor-types	POST	Створення нового типу датчика
-/api/sensor-types	GET	Отримання всіх типів датчиків
-/api/sensor-types	DELETE	Видалення типу датчика
-/api/sensor-types	PUT	Оновлення типу датчика
-/api/sensor-types/single	GET	Отримання деталей про один певний тип датчика
+Додаток Б
 
-ДОДАТОК Б
+Сторінка створення Animal Center
 
-Базовий клас реалізації патерну репозиторій
-
-1	using BusinessLogicLayer.Entities.Attributes;
-2	using Core.Configurations;
-3	using Core.EntityHelpers;
-4	using Core.ExpressionHelpers;
-5	using Core.Localizations;
-6	using DataAccessLayer.Abstractions;
-7	using DataAccessLayer.Entities.Attributes;
-8	using Microsoft.Extensions.Localization;
-9	using Microsoft.Extensions.Options;
-10	using MongoDB.Bson.Serialization.Attributes;
-11	using MongoDB.Driver;
-12	using System;
-13	using System.ComponentModel.DataAnnotations;
-14	using System.Linq.Expressions;
-15	using System.Reflection;
-16	
-17	namespace DataAccessLayer.Repositories.BaseRepositories
-18	{
-19	    public class BaseRepository<T> : IRepository<T, Expression<Func<T, bool>>>
-20	        where T : class
-21	    {
-22	        protected readonly IMongoCollection<T> _collection;
-23	        protected readonly IMongoDatabase _database;
-24	
-25	        public BaseRepository(IOptions<MongoDbConfiguration> mongoDbConfigurationOptions, IStringLocalizer<Resource> stringLocalizer)
-26	        {
-27	            var mongoDbConfiguration = mongoDbConfigurationOptions.Value
-28	                ?? throw new ArgumentNullException(nameof(mongoDbConfigurationOptions));
-29	
-30	            var client = new MongoClient(mongoDbConfiguration.ConnectionString);
-31	            _database = client.GetDatabase(mongoDbConfiguration.DbName);
-32	
-33	            var collectionName = typeof(T).GetCustomAttribute<CollectionNameAttribute>()?.CollectionName ??
-34	                throw new ArgumentException(string.Format(stringLocalizer["{0} does not specify collection name. Add CollectionNameAttribute."].Value, typeof(T).Name));
-35	            _collection = _database.GetCollection<T>(collectionName);
-36	        }
-37	
-38	        public virtual async Task<T> CreateAsync(T entity, CancellationToken cancellationToken = default)
-39	        {
-40	            await _collection.InsertOneAsync(entity, cancellationToken: cancellationToken);
-41	            return entity;
-42	        }
-43	
-44	        public virtual Task<T?> ReadByIdAsync(EntityIds id, CancellationToken cancellationToken = default)
-45	        {
-46	            return InternalReadByIdAsync(id, cancellationToken);
-47	        }
-48	
-49	        public virtual async Task<IEnumerable<T>> ReadByPredicateAsync(Expression<Func<T, bool>> predicate, int take, int skip, CancellationToken cancellationToken = default)
-50	        {
-51	            var filter = EditExpression<T>.RemoveAttributedProperties<BsonIgnoreAttribute>(predicate) ?? (entity => true);
-52	
-53	            return await _collection
-54	                .Find(filter)
-55	                .Skip(skip)
-56	                .Limit(take)
-57	                .ToListAsync(cancellationToken);
-58	        }
-59	
-60	        public virtual async Task<int> CountEntitiesByPredicateAsync(Expression<Func<T, bool>> predicate, int take, int skip, CancellationToken cancellationToken = default)
-61	        {
-62	            var filter = EditExpression<T>.RemoveAttributedProperties<BsonIgnoreAttribute>(predicate) ?? (entity => true);
-63	            return (int)await _collection.Find(filter).Skip(skip).Limit(take).CountDocumentsAsync(cancellationToken);
-64	        }
-65	
-66	        public virtual async Task<T> UpdateAsync(T entity, CancellationToken cancellationToken = default)
-67	        {
-68	            var id = GeneralIdExtractor<T, KeyAttribute>.GetId(entity);
-69	            var filter = GetFilterDefinition(id);
-70	            await _collection.ReplaceOneAsync(filter, entity, cancellationToken: cancellationToken);
-71	            return entity;
-72	        }
-73	
-74	        public virtual async Task<bool> DeleteAsync(EntityIds id, CancellationToken cancellationToken = default)
-75	        {
-76	            var filter = GetFilterDefinition(id);
-77	            var result = await _collection.DeleteOneAsync(filter, cancellationToken);
-78	            return result.DeletedCount > 0;
-79	        }
-80	
-81	        public virtual async Task<bool> DeleteSeveralAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
-82	        {
-83	            var result = await _collection.DeleteManyAsync(predicate, cancellationToken);
-84	            return result.DeletedCount > 0;
-85	        }
-86	
-87	        protected FilterDefinition<T>? GetFilterDefinition(EntityIds id)
-88	        {
-89	            var filterBuilder = Builders<T>.Filter;
-90	            FilterDefinition<T>? filter = null;
-91	
-92	            foreach (var keyValuePair in id)
-93	            {
-94	                if (filter is null)
-95	                {
-96	                    filter = filterBuilder.Eq(keyValuePair.Key, keyValuePair.Value);
-97	                }
-98	                else
-99	                {
-100	                    filter &= filterBuilder.Eq(keyValuePair.Key, keyValuePair.Value);
-101	                }
-102	            }
-103	
-104	            return filter;
-105	        }
-106	
-107	        private async Task<T?> InternalReadByIdAsync(EntityIds id, CancellationToken cancellationToken = default)
-108	        {
-109	            var filter = GetFilterDefinition(id);
-110	
-111	            return await _collection.Find(filter).FirstOrDefaultAsync(cancellationToken);
-112	        }
-113	
-114	        public virtual Task<T?> ReadByIdAsync(EntityIds id, string localizationCode, CancellationToken cancellationToken = default)
-115	        {
-116	            return ReadByIdAsync(id, cancellationToken);
-117	        }
-118	
-119	        public virtual Task<IEnumerable<T>> ReadByPredicateAsync(Expression<Func<T, bool>> predicate, int take, int skip, string localizationCode, CancellationToken cancellationToken = default)
-120	        {
-121	            return ReadByPredicateAsync(predicate, take, skip, cancellationToken);
-122	        }
-123	
-124	        public virtual Task<int> CountEntitiesByPredicateAsync(Expression<Func<T, bool>> predicate, int take, int skip, string localizationCode, CancellationToken cancellationToken = default)
-125	        {
-126	            return CountEntitiesByPredicateAsync(predicate, take, skip, cancellationToken);
-127	        }
-128	
-129	        public virtual async Task<IEnumerable<T>> ReadByPredicateAsync(Expression<Func<T, bool>> predicate, int take, int skip, IDictionary<Expression<Func<T, object>>, bool> orderBy, CancellationToken cancellationToken = default)
-130	        {
-131	            var filter = EditExpression<T>.RemoveAttributedProperties<BsonIgnoreAttribute>(predicate) ?? (entity => true);
-132	
-133	            var filteredCollection = _collection
-134	                    .Find(filter)
-135	                    .Skip(skip)
-136	                    .Limit(take);
-137	
-138	            foreach (var keyValue in orderBy)
-139	            {
-140	                filteredCollection = keyValue.Value ? 
-141	                    filteredCollection.SortByDescending(keyValue.Key)
-142	                    :
-143	                    filteredCollection.SortBy(keyValue.Key);
-144	            }
-145	
-146	            return await filteredCollection.ToListAsync();
-147	        }
-148	
-149	        public virtual Task<T> CreateAsync(T entity, string localizationCode, CancellationToken cancellationToken = default)
-150	        {
-151	            return CreateAsync(entity, cancellationToken);
-152	        }
-153	
-154	        public virtual Task<T> UpdateAsync(T entity, string localizationCode, CancellationToken cancellationToken = default)
-155	        {
-156	            return UpdateAsync(entity, cancellationToken);
-157	        }
-158	    }
-159	}
-
-ДОДАТОК В
-
-Базовий клас сервісів
-
-1	using AutoMapper;
-2	using BusinessLogicLayer.Abstractions.BaseInterfaces;
-3	using BusinessLogicLayer.Entities.Pagination;
-4	using BusinessLogicLayer.Helpers;
-5	using Core.Constants;
-6	using Core.EntityHelpers;
-7	using Core.Localizations;
-8	using DataAccessLayer.Abstractions;
-9	using Microsoft.Extensions.Localization;
-10	using System.Linq.Expressions;
-11	
-12	namespace BusinessLogicLayer.Services.BaseServices
-13	{
-14	    public class BaseCrudService<T, TIdDto, TDetailedDto, TCreateDto, TUpdateDto, TIdAttribute> : ICrudService<T, TIdDto, TDetailedDto, TCreateDto, TUpdateDto>
-15	        where TIdAttribute : Attribute
-16	        where T : ICloneable
-17	    {
-18	        protected readonly IMapper _mapper;
-19	        protected readonly IUnitOfWork _unitOfWork;
-20	        private readonly IStringLocalizer<Resource> _stringLocalizer;
-21	        private IRepository<T, Expression<Func<T, bool>>>? _repository;
-22	        private readonly Dictionary<Type, object> _specificRepositories = new Dictionary<Type, object>();
-23	
-24	        public BaseCrudService(
-25	            IMapper mapper,
-26	            IUnitOfWork unitOfWork,
-27	            IStringLocalizer<Resource> stringLocalizer
-28	            )
-29	        {
-30	            _mapper = mapper;
-31	            _unitOfWork = unitOfWork;
-32	            _stringLocalizer = stringLocalizer;
-33	        }
-34	
-35	        public virtual async Task<TDetailedDto> CreateEntityAsync(TCreateDto newEntity, CancellationToken cancellationToken = default)
-36	        {
-37	            var createdEntity = await (await GetRepositoryAsync(cancellationToken))
-38	                .CreateAsync(_mapper.Map<T>(newEntity), cancellationToken);
-39	            return _mapper.Map<TDetailedDto>(createdEntity);
-40	        }
-41	
-42	        public virtual async Task DeleteEntityAsync(TIdDto ids, CancellationToken cancellationToken = default)
-43	        {
-44	            await (await GetRepositoryAsync()).DeleteAsync(GeneralIdExtractor<TIdDto, TIdAttribute>.GetId(ids), cancellationToken);
-45	        }
-46	
-47	        public virtual async Task<IEnumerable<TDetailedDto>> ReadEntitiesByPredicateAsync(Expression<Func<T, bool>> predicate, PaginationParameters paginationParameters, CancellationToken cancellationToken = default)
-48	        {
-49	            var fetchedEntities = await (await GetRepositoryAsync(cancellationToken))
-50	                .ReadByPredicateAsync(predicate, paginationParameters.GetTake(), paginationParameters.GetSkip(), cancellationToken);
-51	
-52	            return _mapper.Map<IEnumerable<TDetailedDto>>(
-53	                fetchedEntities
-54	            );
-55	        }
-56	
-57	        public virtual async Task<TDetailedDto?> ReadEntityByIdAsync(TIdDto ids, CancellationToken cancellationToken = default)
-58	        {
-59	            return _mapper.Map<TDetailedDto?>(
-60	                await (await GetRepositoryAsync(cancellationToken))
-61	                .ReadByIdAsync(GeneralIdExtractor<TIdDto, TIdAttribute>.GetId(ids), cancellationToken));
-62	        }
-63	
-64	        public virtual async Task<TDetailedDto> UpdateEntityAsync(TUpdateDto newEntity, CancellationToken cancellationToken = default)
-65	        {
-66	            var id = GeneralIdExtractor<TUpdateDto, TIdAttribute>.GetId(newEntity);
-67	            var oldEntity = await (await GetRepositoryAsync(cancellationToken)).ReadByIdAsync(id, cancellationToken);
-68	
-69	            if (oldEntity is null)
-70	            {
-71	                throw new ArgumentException(string.Format(_stringLocalizer["There is no {0} with {1} id."].Value, typeof(T).Name, id.ToString()));
-72	            }
-73	            UpdateHelper<TUpdateDto, T>.ReplaceUpdatedProperties(newEntity, oldEntity);
-74	            return _mapper.Map<TDetailedDto>(await (await GetRepositoryAsync(cancellationToken)).UpdateAsync(oldEntity, cancellationToken));
-75	        }
-76	
-77	        public virtual Task<IEnumerable<TDetailedDto>> ReadAllEntitiesAsync(CancellationToken cancellationToken = default)
-78	        {
-79	            return ReadEntitiesByPredicateAsync(entity => true, PaginationParameters.All(), cancellationToken);
-80	        }
-81	
-82	        public virtual async Task<TDetailedDto?> ReadEntityByIdAsync(TIdDto id, string localizationCode, CancellationToken cancellationToken = default)
-83	        {
-84	            return _mapper.Map<TDetailedDto?>(
-85	                await (await GetRepositoryAsync(cancellationToken))
-86	                .ReadByIdAsync(GeneralIdExtractor<TIdDto, TIdAttribute>.GetId(id), localizationCode, cancellationToken));
-87	        }
-88	
-89	        public async Task<IEnumerable<TDetailedDto>> ReadEntitiesByPredicateAsync(Expression<Func<T, bool>> predicate, PaginationParameters paginationParameters, string localizationCode, CancellationToken cancellationToken = default)
-90	        {
-91	            var fetchedEntities = await (await GetRepositoryAsync(cancellationToken))
-92	                .ReadByPredicateAsync(predicate, paginationParameters.GetTake(), paginationParameters.GetSkip(), localizationCode, cancellationToken);
-93	
-94	            return _mapper.Map<IEnumerable<TDetailedDto>>(fetchedEntities);
-95	        }
-96	
-97	        public Task<IEnumerable<TDetailedDto>> ReadAllEntitiesAsync(string localizationCode, CancellationToken cancellationToken = default)
-98	        {
-99	            return ReadEntitiesByPredicateAsync(entity => true, PaginationParameters.All(), localizationCode, cancellationToken);
-100	        }
-101	
-102	        public async Task<IEnumerable<TDetailedDto>> ReadEntitiesByPredicateAsync(Expression<Func<T, bool>> predicate, PaginationParameters paginationParameters, IDictionary<string, string> orderBy, CancellationToken cancellationToken = default)
-103	        {
-104	            var mappedOrderBy = orderBy
-105	                .Select(keyValue =>
-106	                {
-107	                    if (!keyValue.Key.Contains(OrderByConstants.Postfix))
-108	                    {
-109	                        return new KeyValuePair<Expression<Func<T, object>>, bool>();
-110	                    }
-111	
-112	                    var propertyExpression = GeneralIdExtractor<T, TIdAttribute>.GetPropertyExpression(keyValue.Key.Replace(OrderByConstants.Postfix, ""));
-113	                    if (propertyExpression is null)
-114	                    {
-115	                        throw new ArgumentException(string.Format(_stringLocalizer["There is no {0} property"].Value, keyValue.Key));
-116	                    }
-117	                    return new KeyValuePair<Expression<Func<T, object>>, bool>(propertyExpression, keyValue.Value == OrderByConstants.Descending);
-118	                })
-119	                .Where(kv => kv.Key != null)
-120	                .ToDictionary(kv => kv.Key, kv => kv.Value);
-121	
-122	            var fetchedEntities = await (await GetRepositoryAsync(cancellationToken))
-123	                .ReadByPredicateAsync(predicate, paginationParameters.GetTake(), paginationParameters.GetSkip(), mappedOrderBy, cancellationToken);
-124	
-125	            return _mapper.Map<IEnumerable<TDetailedDto>>(fetchedEntities);
-126	        }
-127	
-128	        protected async Task<IRepository<T, Expression<Func<T, bool>>>> GetRepositoryAsync(CancellationToken cancellationToken = default)
-129	        {
-130	            _repository ??= await _unitOfWork.GetRepositoryAsync<T, Expression<Func<T, bool>>>(cancellationToken);
-131	            return _repository;
-132	        }
-133	
-134	        protected async Task<TSpecificRepository> GetSpecificRepositoryAsync<TSpecificRepository>(CancellationToken cancellationToken = default)
-135	        {
-136	            if (!_specificRepositories.TryGetValue(typeof(TSpecificRepository), out object? repository) && repository is null)
-137	            {
-138	                repository = await _unitOfWork.GetSpecificRepository<TSpecificRepository>(cancellationToken);
-139	            }
-140	            return (TSpecificRepository)repository!;
-141	        }
-142	
-143	        public async Task<IEnumerable<TDetailedDto>> ReadEntitiesByPredicateAsync(Expression<Func<T, bool>> predicate, PaginationParameters paginationParameters, IDictionary<Expression<Func<T, object>>, bool> orderBy, CancellationToken cancellationToken = default)
-144	        {
-145	            return _mapper.Map<IEnumerable<TDetailedDto>>(await (await GetRepositoryAsync(cancellationToken))
-146	                .ReadByPredicateAsync(predicate, paginationParameters.GetTake(), paginationParameters.GetSkip(), orderBy, cancellationToken));
-147	        }
-148	    }
-149	}
-
-ДОДАТОК Г
-
-Конвеєрна частина обробки помилок
-
-1	using Microsoft.Extensions.Options;
-2	using System.Text;
-3	using VetAuto.Models;
-4	
-5	namespace VetAuto.Middlewares
-6	{
-7	    public class ErrorHandlingMiddleware
-8	    {
-9	        private const string PLAIN_TEXT_CONTENT_TYPE = "text/plain";
-10	
-11	        private readonly RequestDelegate _next;
+1	import React, { useState } from "react";
+2	import axiosInstance from "../axios-instance";
+3	import { useNavigate } from "react-router-dom";
+4	import { useTranslation } from "react-i18next";
+5	
+6	interface AnimalCenterCreationFormData {
+7	  name: string;
+8	  password: string;
+9	  address: string;
+10	  info: string;
+11	}
 12	
-13	        public ErrorHandlingMiddleware(RequestDelegate next)
-14	        {
-15	            _next = next;
-16	        }
-17	
-18	        public async Task InvokeAsync(HttpContext httpContext)
-19	        {
-20	            try
-21	            {
-22	                await _next(httpContext);
-23	            }
-24	            catch (Exception ex)
-25	            {
-26	                Error error = ex switch
-27	                {
-28	                    ArgumentException aex => new Error(400, aex.Message),
-29	                    InvalidOperationException iex => new Error(400, iex.Message),
-30	                    _ => new Error(500, ex.Message),
-31	                };
-32	
-33	                await WriteResponseAsync(httpContext, error);
-34	            }
-35	        }
-36	
-37	        private async Task WriteResponseAsync(HttpContext httpContext, Error error)
-38	        {
-39	            httpContext.Response.StatusCode = error.StatusCode;
-40	            httpContext.Response.Headers["Content-Type"] = PLAIN_TEXT_CONTENT_TYPE;
-41	            await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(error.Message));
-42	        }
-43	    }
+13	const AnimalCenterCreationForm: React.FC = () => {
+14	  const [formData, setFormData] = useState<AnimalCenterCreationFormData>({
+15	    name: "",
+16	    password: "",
+17	    address: "",
+18	    info: "",
+19	  });
+20	  const navigate = useNavigate();
+21	  const { t } = useTranslation();
+22	
+23	  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+24	    const { name, value } = e.target;
+25	    setFormData({ ...formData, [name]: value });
+26	  };
+27	
+28	  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+29	    e.preventDefault();
+30	    try {
+31	      await axiosInstance
+32	        .post("/api/animalCenter", formData)
+33	        .then(() => navigate("/animal-centers"));
+34	      // Handle successful form submission
+35	    } catch (error) {
+36	      // Handle error
+37	    }
+38	  };
+39	
+40	  return (
+41	    <form onSubmit={handleSubmit}>
+42	      <input
+43	        type="text"
+44	        name="name"
+45	        value={formData.name}
+46	        onChange={handleChange}
+47	        placeholder={t("Name")}
+48	      />
+49	      <input
+50	        type="password"
+51	        name="password"
+52	        value={formData.password}
+53	        onChange={handleChange}
+54	        placeholder={t("Password")}
+55	      />
+56	      <input
+57	        type="text"
+58	        name="address"
+59	        value={formData.address}
+60	        onChange={handleChange}
+61	        placeholder={t("Address")}
+62	      />
+63	      <input
+64	        type="text"
+65	        name="info"
+66	        value={formData.info}
+67	        onChange={handleChange}
+68	        placeholder={t("Info")}
+69	      />
+70	      <button type="submit">{t("Submit")}</button>
+71	    </form>
+72	  );
+73	};
+74	
+75	export default AnimalCenterCreationForm;
+
+Додаток В
+
+Сторінка деталей про тварину
+
+1	import React, { useState, useEffect } from "react";
+2	import { useParams } from "react-router-dom";
+3	import axiosInstance from "../axios-instance";
+4	import { MapContainer, Marker, Polyline, TileLayer } from "react-leaflet";
+5	import { LatLngTuple } from "leaflet";
+6	import "./css/Map.css";
+7	import { useTranslation } from "react-i18next";
+8	
+9	interface Animal {
+10	  id: string;
+11	  name: string;
+12	  typeId: string;
+13	  animalCenterId: string;
+14	}
+15	
+16	interface FeedingPlace {
+17	  feedingDate: Date;
+18	  coordinates: LatLngTuple;
+19	}
+20	
+21	const AnimalPage: React.FC = () => {
+22	  const { id } = useParams<{ id: string }>();
+23	  const [animal, setAnimal] = useState<Animal | null>(null);
+24	  const [feedingPlaces, setFeedingPlaces] = useState<FeedingPlace[]>([]);
+25	  const [averageEatenFood, setAverageEatenFood] = useState<number>(0);
+26	  const [noEat, setNoEat] = useState<Date>(new Date(0));
+27	  const { t } = useTranslation();
+28	
+29	  useEffect(() => {
+30	    axiosInstance
+31	      .get<Animal>(`api/animals/single?Id=${id}`)
+32	      .then((response) => setAnimal(response.data))
+33	      .catch((error) => console.error("Error fetching animal:", error));
+34	
+35	    axiosInstance
+36	      .get<FeedingPlace[]>(`api/animals/feeding-places/${id}`)
+37	      .then((response) => setFeedingPlaces(response.data))
+38	      .catch((error) => console.error("Error fetching animal:", error));
+39	
+40	    axiosInstance
+41	      .get<number>(`api/animals/average-eaten-food/${id}`)
+42	      .then((response) => setAverageEatenFood(response.data))
+43	      .catch((error) => console.error("Error fetching animal:", error));
 44	
-45	    public static class ErrorHandlingMiddlewareExtensions
-46	    {
-47	        public static WebApplication UseErrorHandling(this WebApplication app)
-48	        {
-49	            app.UseMiddleware<ErrorHandlingMiddleware>();
-50	            return app;
-51	        }
-52	    }
-53	}
+45	    axiosInstance
+46	      .get<Date>(`api/animals/no-eat/${id}`)
+47	      .then((response) => setNoEat(response.data))
+48	      .catch((error) => console.error("Error fetching animal:", error));
+49	  }, [id]);
+50	
+51	  if (!animal) {
+52	    return <div>{t("Loading...")}</div>;
+53	  }
+54	
+55	  return (
+56	    <div>
+57	      <h2>{t("Animal Details")}</h2>
+58	      <p>
+59	        {t("ID")}: {animal.id}
+60	      </p>
+61	      <p>
+62	        {t("Name")}: {animal.name}
+63	      </p>
+64	      <p>
+65	        {t("Type ID")}: {animal.typeId}
+66	      </p>
+67	      <p>
+68	        {t("Animal Center ID")}: {animal.animalCenterId}
+69	      </p>
+70	      <p>
+71	        {t("Average eaten food")}: {averageEatenFood}
+72	      </p>
+73	      <p>
+74	        {t("No eat period")}: {noEat.toString()}
+75	      </p>
+76	      {feedingPlaces.length ? (
+77	        <MapContainer
+78	          center={feedingPlaces[0].coordinates}
+79	          zoom={13}
+80	          scrollWheelZoom={false}
+81	        >
+82	          <TileLayer
+83	            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+84	            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+85	          />
+86	          {feedingPlaces.map(
+87	            (v, i, arr) =>
+88	              i && (
+89	                <Polyline
+90	                  positions={[v.coordinates, arr[i - 1].coordinates]}
+91	                  color="red"
+92	                />
+93	              )
+94	          )}
+95	          {feedingPlaces.map((v) => (
+96	            <Marker position={v.coordinates} />
+97	          ))}
+98	        </MapContainer>
+99	      ) : (
+100	        <p>{t("There is no feeding places to show(")}</p>
+101	      )}
+102	    </div>
+103	  );
+104	};
+105	
+106	export default AnimalPage;
+
+Додаток Г
+
+Файл запуску
+
+1	import React from "react";
+2	import ReactDOM from "react-dom/client";
+3	import App from "./App.tsx";
+4	import { RouterProvider, createBrowserRouter } from "react-router-dom";
+5	import AnimalsView from "./views/AnimalView.tsx";
+6	import AnimalCenterView from "./views/AnimalCenterView.tsx";
+7	import AnimalCenterUpdateForm from "./forms/AnimalCenterUpdateForm.tsx";
+8	import AnimalCenterCreationForm from "./forms/AnimalCenterCreationForm.tsx";
+9	import AnimalUpdateForm from "./forms/AnimalUpdateForm.tsx";
+10	import AnimalCreationForm from "./forms/AnimalCreationForm.tsx";
+11	import SensorTypeView from "./views/SensorTypeView.tsx";
+12	import SensorTypeUpdateForm from "./forms/SensorTypeUpdateForm.tsx";
+13	import SensorTypeCreationForm from "./forms/SensorTypeCreationForm.tsx";
+14	import SensorView from "./views/SensorView.tsx";
+15	import SensorUpdateForm from "./forms/SensorUpdateForm.tsx";
+16	import SensorCreationForm from "./forms/SensorCreationForm.tsx";
+17	import FeederView from "./views/FeederView.tsx";
+18	import FeederUpdateForm from "./forms/FeederUpdateForm.tsx";
+19	import FeederCreationForm from "./forms/FeederCreationForm.tsx";
+20	import AnimalTypeView from "./views/AnimalTypeView.tsx";
+21	import AnimalTypeUpdateForm from "./forms/AnimalTypeUpdateForm.tsx";
+22	import AnimalTypeCreationForm from "./forms/AnimalTypeCreationForm.tsx";
+23	import AnimalFeederView from "./views/AnimalFeederView.tsx";
+24	import AnimalFeederCreationForm from "./forms/AnimalFeederCreationForm.tsx";
+25	import AnimalFeederUpdateForm from "./forms/AnimalFeederUpdateForm.tsx";
+26	import LoginForm from "./forms/LoginForm.tsx";
+27	import RegistrationForm from "./forms/RegistrationForm.tsx";
+28	import AnimalPage from "./entity-pages/AnimalPage.tsx";
+29	import "./i18n";
+30	import AppPage from "./entity-pages/AppPage.tsx";
+31	import FeederPage from "./entity-pages/FeederPage.tsx";
+32	
+33	const router = createBrowserRouter([
+34	  {
+35	    path: "/",
+36	    element: <App />,
+37	    children: [
+38	      {
+39	        path: "",
+40	        element: <AppPage />,
+41	      },
+42	      {
+43	        path: "animals/create",
+44	        element: <AnimalCreationForm />,
+45	      },
+46	      {
+47	        path: "animals/update/:animalId",
+48	        element: <AnimalUpdateForm />,
+49	      },
+50	      {
+51	        path: "animals",
+52	        element: <AnimalsView />,
+53	      },
+54	      {
+55	        path: "animals/:id",
+56	        element: <AnimalPage />,
+57	      },
+58	      {
+59	        path: "animal-centers/create",
+60	        element: <AnimalCenterCreationForm />,
+61	      },
+62	      {
+63	        path: "animal-centers/update/:animalCenterId",
+64	        element: <AnimalCenterUpdateForm />,
+65	      },
+66	      {
+67	        path: "animal-centers",
+68	        element: <AnimalCenterView />,
+69	      },
+70	      {
+71	        path: "animal-feeders/create",
+72	        element: <AnimalFeederCreationForm />,
+73	      },
+74	      {
+75	        path: "animal-feeders/update/:animalFeederid",
+76	        element: <AnimalFeederUpdateForm />,
+77	      },
+78	      {
+79	        path: "animal-feeders",
+80	        element: <AnimalFeederView />,
+81	      },
+82	      {
+83	        path: "animal-types/create",
+84	        element: <AnimalTypeCreationForm />,
+85	      },
+86	      {
+87	        path: "animal-types/update/:animalTypeid",
+88	        element: <AnimalTypeUpdateForm />,
+89	      },
+90	      {
+91	        path: "animal-types",
+92	        element: <AnimalTypeView />,
+93	      },
+94	      {
+95	        path: "feeders/create",
+96	        element: <FeederCreationForm />,
+97	      },
+98	      {
+99	        path: "feeders/update/:feederId",
+100	        element: <FeederUpdateForm />,
+101	      },
+102	      {
+103	        path: "feeders",
+104	        element: <FeederView />,
+105	      },
+106	      {
+107	        path: "feeders/:id",
+108	        element: <FeederPage />,
+109	      },
+110	      {
+111	        path: "sensors/create",
+112	        element: <SensorCreationForm />,
+113	      },
+114	      {
+115	        path: "sensors/update/:sensorId",
+116	        element: <SensorUpdateForm />,
+117	      },
+118	      {
+119	        path: "sensors",
+120	        element: <SensorView />,
+121	      },
+122	      {
+123	        path: "sensor-types/create",
+124	        element: <SensorTypeCreationForm />,
+125	      },
+126	      {
+127	        path: "sensor-types/update/:sensorTypeId",
+128	        element: <SensorTypeUpdateForm />,
+129	      },
+130	      {
+131	        path: "sensor-types",
+132	        element: <SensorTypeView />,
+133	      },
+134	      {
+135	        path: "login",
+136	        element: <LoginForm />,
+137	      },
+138	      {
+139	        path: "register",
+140	        element: <RegistrationForm />,
+141	      },
+142	    ],
+143	  },
+144	]);
+145	
+146	ReactDOM.createRoot(document.getElementById("root")!).render(
+147	  <React.StrictMode>
+148	    <RouterProvider router={router} />
+149	  </React.StrictMode>
+150	);

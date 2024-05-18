@@ -1,495 +1,363 @@
-РОЗРОБКА BACK-END ЧАСТИНИ ПРОГРАМНОЇ СИСТЕМИ
+РОЗРОБКА MOBILE ЧАСТИНИ ПРОГРАМНОЇ СИСТЕМИ
 
-МЕТА РОБОТИ
+Мета роботи:
+Покращити навички проектування програмних систем. Розробити  mobile частину програмної системи та описати її з допомогою демонстраційного відео, UML Use Case diagram, UML Package diagram, UML Component Diagram, UML State Diagram.
 
-Покращити навички проектування програмних систем. Розробити back-end частину програмної системи та описати її з допомогою демонстраційного відео, REST специфікації, UML Deployment diagram, UML Use Case diagram, ER-моделі даних та UML Package diagram.
-
-ХІД РОБОТИ
-
-Демо ролик проєкту доступний за посиланням (https://youtu.be/HyuXqLRw08I).
-Посилання на репозиторій програмної системи: https://github.com/NureZhuravelYevhenii/apz-pzpi-21-5-zhuravel-yevhenii.
+Хід роботи:
+Демо ролик проєкту доступний за посиланням (https://youtu.be/49MkLrbWxc0).
+Посилання на репозиторій програмної системи: https://github.com/NureZhuravelYevhenii/apz-pzpi-21-5-zhuravel-yevhenii .
 
 1 АРХІТЕКТУРА ТА ІНЖЕНЕРНІ РІШЕННЯ
-1.1 ОПИС СИСТЕМИ
 
-Серверна частина системи - це моноліт з No-sql базою даних MongoDb. Моноліт складається з трьох шарів: ui шар, що становить собою сервер обробки HTTP запитів, шар бізнес логіки, в якому знаходяться сервіси для вторинної обробки запитів та шар доступу до даних, що з допомогою зв'язування з базою даних дає можливість керувати даними.
+Mobile частина зроблена з допомогою MAUI, що дозволяє користувачам створювати застосунки для більшості популярних платформ, без написання коду спеціально під конкретну платформу напряму. Для реалізації використовувався шаблон MVVM, який дозволяє створити конкретні компоненти відображення View, які поєднуються з шаром бізнес логіки Model з допомогою середньої ланки ViewModel. Це дозволяє створювати застосунки, що залежать від наданих їм інтерфейсів в ViewModel, що спрощує реалізацію UI. Але я писав ViewModel з нуля, так як інші UI частини системи використовують інші технології.
 
-1.2	ШАР ОБРОБКИ ЗАПИТІВ 
+1.1	ШАР МОБІЛЬНОГО ЗАСТОСУНКУ 
 
-Написаний з допомогою технології ASP.NET Core, включає в себе контролери для обробки запитів пов'язаних з сутностями та з допомогою Chain of Responsibility реєструються методи, наприклад, для обробки помилок. Також в цьому шарі реєструються сервіси для Dependency Injection, для створення об'єктів класів ефективно. Є реєстрація пакетів локалізацій, що знаходяться в загальному шарі Core, що дає можливість доступу до нього з усіх шарів моноліту з уникненням циклічних залежностей.
+Цей шар використовує фреймворк MAUI для написання коду, який в подальшому компілюється в код специфічний для конкретної платформи. Цей шар складається з View, що написані з допомогою мови розмітки XAML, ViewModel, що реалізують шаблон Prod Cons з допомогою інтерфейсу INotifyPropertyChanged та бібліотеки для полегшення використання цього інтерфейсу CommunityToolkit. Цей шар звертається до шару зв’язку з API.
 
-1.3	ШАР БІЗНЕС ЛОГІКИ
+1.2	ШАР ЗВ’ЯЗКУ З API
 
-Шар, що має в собі сервіси для обробки запитів по управлінню та отриманню сутностей. Більшість функціональності по управлінню сутностями описано в класі BaseCrudService, для уникнення дублювання коду, а для того, щоб програма відповідала принципу Solid Open-closed, методи, що можуть мати іншу реалізацію в класах наслідниках BaseCrudService, є віртуальними, для їх перевантаження. Для того, щоб користувач мав доступ лише до конкретних полей реальних сутностей бази даних, використовується mapping сутностей AutoMapper. Вся конфігурація для mapper описана в папці AutoMapper.
+Шар забезпечує реалізації методів для з’єднання з API, конкретні методи для створення моделей, авторизації, тощо. Цей шар використовує сутності з конфігураціями, котрі створюються ServiceProvider.
 
-1.4	ШАР ДОСТУПУ ДО ДАНИХ
+1.4	ЛОКАЛІЗАЦІЯ
 
-Шар, що містить реалізацію патерну repository для драйверу MongoDb для .NET платформи, що інкапсулюють логіку управління та читання даних з MongoDb бази даних. Як і в попередньому шарі, більшість логіки описана в загальному класі BaseRepository, який використовує альтернативну версію декоратора сутностей у вигляді атрибутів, конкретно CollectionName, що дає можливість вказати назву колекції, до якої відноситься сутність, що забезпечує правильну роботу при використанні більшості сутностей.
+Локалізація реалізована з допомогою файлів ресурсів та ResourceManager. Файли ресурсів додаються як частина маніфесту програми, а ResourceManager вибирає файл, який потрібно зчитати судячи з додаткової інформації: MobileResources.en, де en – локалізація.
 
-1.5	ШАР ЗАГАЛЬНОЇ ФУНКЦІОНАЛЬНОСТІ
+1.5	ЗАГАЛЬНА ІНФОРМАЦІЯ
 
-Шар, що містить загальну функціональність, що може бути використана будь яким шаром. До неї відносяться загальні enum (Season, Month), кофнігурації, константи, локалізації, сервіси, що можуть бути використані в будь якому шарі (сервіс часу) та класи управління засобами метапрограмування платформи .NET Expression. З допомогою цих класів генеруються функції для керування станом сутностей, або отримання лямбда виразів для, наприклад, предикату пошуку сутності по ідентифікатору. Так як ці функції генеруються під час виконання програми, а також генеруються лише один раз, вони дозволяють не писати подібні функції вручну, що дозволяє уникнути великої кількості коду, що повторюється. Також в шарі доступу до даних, в реалізаціях патерну repository для конкретних сутностей, створені методи для агрегацій даних з бази даних, що дає можливість уникнути обробки великої кількості даних на стороні сервера, роблячи конкретні запити до бази даних. Наприклад так в AnimalFeederRepostory розраховуються найпопулярніші годівниці з допомогою групування записів по ідентифікатору годівниці та сортування результатів по спаданню кількості запитів. Подібні методи реалізовані і для AnimalRepository, AnimalTypeRepository, тощо.
+Всі сервіси реалізують абстракції, що забезпечує виконання принципу SOLID Dependency Inversion, а також допомагає в реалізації Dependency Injection, що спрощує створення сторінок, а також дає можливість спрощено їх додавати, не змінюючи при цьому написану розмітку основного застосунку.
 
-1.6 ЛОКАЛІЗАЦІЯ
+2	ДІАГРАМА КОМПОНЕНТ
 
-Локалізація реалізована з допомогою реалізації інтерфейсу IStringLocalizer в бібілотеці Microsoft.AspNetCore.Localization. Він реєструється в файлі Program.cs з допомогою методу розширення AddLocalization, та бере .resx файли ресурсів, що знаходяться в шарі загальної функціональності.
+Була створена діаграма компонентів (рис. 1), що показує як пов’язані сторінки сутностей з сервісами, та які елементи керування вони дають.
 
-1.7	ЗАГАЛЬНА ІНФОРМАЦІЯ
+3	ДІАГРАМА ПРЕЦЕДЕНТІВ
 
-Для більшості шарів створені бібліотеки інтерфейсів, що дають можливість відповідати принципу Solid Dependency Inversion, та залежати лише від абстракції, при цьому з можливістю заміни реалізації з допомогою налаштування стандартного контейнеру залежностей ASP.NET, чи контейнера бібліотеки AutoFac, що допомагає реєструвати сервіси ефективніше.
+Для розуміння ситуацій використання програмної системи була сформована діаграма прецедентів (додаток А).
+Система має три види користувачів: не зареєстрований користувач, зареєстрований користувач, годівниця.
 
-2 	СПЕЦИФІКАЦІЯ REST
+4	ДІАГРАМА ПАКЕТІВ
 
-В додатку А надана REST специфікація, що описує створений API шляхом надання інформації про кожен endpoint системи.
+Була створена діаграма пакетів mobile частини проєкту (рис. 2). Ця частина проєкту складається з таких пакетів як Mobile (основна функціональність) та Mobile.ApiService. Вся їх функціональність була описана в попередніх розділах, а залежності показані на рисунку 2.
 
-3	DEPLOYMENT DIAGRAM
+5	ДІАГРАМА СТАНІВ
 
-Було сформовано діаграму розгортання (рис. 1) для зображення елементів системи та їх зв’язку.
-Рисунок 1 - UML Deployment diagram
-Система складається з серверної частини, яка пов’язана з базою даних, та до якої звертаються web, mobile та Smart device частини проєкту, які для цього використовують протокол HTTP.
-
-4	USE CASE DIAGRAM
-
-Для розуміння ситуацій використання програмної системи була сформована Use Case diagram (рис. 2). 
-Рисунок 2 – Use Case diagram
-Система має два види користувачів: Зареєстрований користувач (є самим тваринним центром) та годівниця.
-
-5	ER-МОДЕЛЬ ДАНИХ
-
-Для показання зв’язку сутностей, що фігурують в системі, була створена ER-модель даних (рис. 3).
-Рисунок 3 – ER-модель даних
-AnimalCenter може мати нуль або безліч сенсорів (Sensor), годівниць (Feeder) та тварин (Animal), які в свою чергу пов’язані з своїми типами (SensorType, FeederType, AnimalType), або додатковими сутностями (GeoPoint). Також тварини та годівниці пов’язані сутністю AnimalFeeder зв’язком один до багатьох, яка зберігає інформацію про годування тварини в даній годівниці. Сенсори пов’язані відношенням один до багатьох з твариною, так як він закріпляється за нею.
-Була створена Package Diagram backend частини проєкту (рис. 4).
-Рисунок 4 - Package Diagram
-Back-end частина складається з модулю для роботи з базою даних (DAL), модулів для обробки даних (BLL та Adapters) та все це поєднується в модуль серверного застосунку (VetAuto). Додаткові функції та об’єкти знаходяться в модулі Core.
+Була стоврена діаграма станів (рис. 3), для відображення станів, в яких може бути застосунок.
 
 Висновки:
-Під час роботи над лабораторною роботою, я розробив back-end частину програмної системи та описав її з допомогою демонстраційного відео, UML Deployment diagram, UML Use Case diagram, ER-моделі даних та UML Package diagram.
+Під час роботи над лабораторною роботою, я розробив  mobile частину програмної системи та описав її з допомогою демонстраційного відео, UML Use Case diagram, UML Package diagram, UML Component Diagram, UML State Diagram.
 
-ДОДАТОК А
+Додаток А
 
-REST специфікація
+Діаграма прецедентів
 
-Таблиця 1 – Специфікація REST API
-Шлях	Метод	Призначення
-/api/AnimalCenter/register	POST	Реєстрація в центрі тварин
-/api/AnimalCenter/login	POST	Вхід в центр тварин
-/api/AnimalCenter/refresh	POST	Оновлення токену доступу
-/api/AnimalCenter	POST	Додавання нового запису в центр тварин
-/api/AnimalCenter	GET	Отримання всіх записів в центрі тварин
-/api/AnimalCenter	DELETE	Видалення запису з центру тварин
-/api/AnimalCenter	PUT	Оновлення запису в центрі тварин
-/api/AnimalCenter/single	GET	Отримання деталей про одну певну тварину в центрі
-/api/Animals/create-animal-feeder	POST	Створення нового кормушки для тварини
-/api/Animals/feeding/{id}	GET	Отримання інформації про годування тварини
-/api/Animals/feeding-places/{id}	GET	Отримання місць годування для певної тварини
-/api/Animals/no-eat/{id}	GET	Отримання інформації про їжу, яку не їсть тварина
-/api/Animals/average-eaten-food/{id}	GET	Отримання середньої кількості спожитої їжі
-/api/Animals	POST	Додавання нової тварини
-/api/Animals	GET	Отримання всіх тварин
-/api/Animals	DELETE	Видалення тварини
-/api/Animals	PUT	Оновлення тварини
-/api/Animals/single	GET	Отримання деталей про одну певну тварину
-/api/animal-types/average-visited/{id}	GET	Отримання середньої кількості відвідувань
-/api/animal-types/feeders-visited-int-season/{id}	GET	Отримання інформації про кормушки, відвідані певним типом тварини в певний сезон
-/api/animal-types	GET	Отримання всіх типів тварин
-Продовження таблиці 1 – Специфікації REST API
-/api/animal-types	POST	Додавання нового типу тварини
-/api/animal-types	DELETE	Видалення типу тварини
-/api/animal-types	PUT	Оновлення типу тварини
-/api/animal-types/single	GET	Отримання деталей про один певний тип тварини
-/api/Feeders	POST	Створення нового кормушки
-/api/Feeders	GET	Отримання всіх кормушок
-/api/Feeders	DELETE	Видалення кормушки
-/api/Feeders	PUT	Оновлення кормушки
-/api/Feeders/popular	GET	Отримання популярних кормушок
-/api/Feeders/{id}/popular-season	GET	Отримання популярного сезону для кормушки
-/api/Feeders/{id}/popular-month	GET	Отримання популярного місяця для кормушки
-/api/Feeders/{id}/popular-day-of-week	GET	Отримання популярного дня тижня для кормушки
-/api/Feeders/single	GET	Отримання деталей про одну певну кормушку
-/api/Sensors	POST	Створення нового датчика
-/api/Sensors	GET	Отримання всіх датчиків
-/api/Sensors	DELETE	Видалення датчика
-/api/Sensors	PUT	Оновлення датчика
-/api/Sensors/single	GET	Отримання деталей про один певний датчик
-/api/sensor-types	POST	Створення нового типу датчика
-/api/sensor-types	GET	Отримання всіх типів датчиків
-/api/sensor-types	DELETE	Видалення типу датчика
-/api/sensor-types	PUT	Оновлення типу датчика
-/api/sensor-types/single	GET	Отримання деталей про один певний тип датчика
+Додаток Б
 
-ДОДАТОК Б
+Сторінка Animal Center (View)
 
-Базовий клас реалізації патерну репозиторій
+1	<?xml version="1.0" encoding="utf-8" ?>
+2	<ContentPage x:Class="VetAutoMobile.Pages.AnimalCentersPage"
+3	             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+4	             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+5	             xmlns:models="clr-namespace:VetAutoMobile.Entities.AnimalCenters;assembly=VetAutoMobile.Entities"
+6	             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+7	             xmlns:viewModels="clr-namespace:VetAutoMobile.ViewModels.PageViewModels"
+8	             Title="AnimalCentersPage"
+9	             x:DataType="viewModels:AnimalCenterViewModel">
+10	
+11	    <ContentPage.Behaviors>
+12	        <toolkit:EventToCommandBehavior Command="{Binding Loaded}"
+13	                                        EventName="Appearing" />
+14	    </ContentPage.Behaviors>
+15	
+16	    <StackLayout>
+17	        <StackLayout IsVisible="{Binding IsCurrentEntitySet}">
+18	            <Label FontAttributes="Bold"
+19	                   FontSize="Large"
+20	                   Text="Animal Center Details" />
+21	
+22	            <StackLayout>
+23	                <Label Text="Name:" />
+24	                <Entry Text="{Binding CurrentEntity.Name}" />
+25	            </StackLayout>
+26	
+27	            <StackLayout>
+28	                <Label Text="Address:" />
+29	                <Entry Text="{Binding CurrentEntity.Address}" />
+30	            </StackLayout>
+31	
+32	            <StackLayout>
+33	                <Label Text="Info:" />
+34	                <Entry Text="{Binding CurrentEntity.Info}" />
+35	            </StackLayout>
+36	
+37	            <Button Command="{Binding Update}"
+38	                    Text="Update" />
+39	            <Button Command="{Binding BackToList}"
+40	                    Text="Back to list" />
+41	        </StackLayout>
+42	        <StackLayout IsVisible="{Binding IsCurrentEntityNotSet}">
+43	            <Label>Animal centers:</Label>
+44	            <ListView ItemsSource="{Binding Entities}"
+45	                      SelectionMode="Single">
+46	                <ListView.Behaviors>
+47	                    <toolkit:EventToCommandBehavior Command="{Binding GetEntity}"
+48	                                                    x:TypeArguments="SelectedItemChangedEventArgs"
+49	                                                    EventName="ItemSelected" />
+50	                </ListView.Behaviors>
+51	                <ListView.ItemTemplate>
+52	                    <DataTemplate x:DataType="models:AnimalCenter">
+53	                        <ViewCell>
+54	                            <StackLayout>
+55	                                <Label Text="Name:" />
+56	                                <Label Text="{Binding Name}" />
+57	                            </StackLayout>
+58	                        </ViewCell>
+59	                    </DataTemplate>
+60	                </ListView.ItemTemplate>
+61	            </ListView>
+62	        </StackLayout>
+63	    </StackLayout>
+64	</ContentPage>
 
-1	using BusinessLogicLayer.Entities.Attributes;
-2	using Core.Configurations;
-3	using Core.EntityHelpers;
-4	using Core.ExpressionHelpers;
-5	using Core.Localizations;
-6	using DataAccessLayer.Abstractions;
-7	using DataAccessLayer.Entities.Attributes;
-8	using Microsoft.Extensions.Localization;
-9	using Microsoft.Extensions.Options;
-10	using MongoDB.Bson.Serialization.Attributes;
-11	using MongoDB.Driver;
-12	using System;
-13	using System.ComponentModel.DataAnnotations;
-14	using System.Linq.Expressions;
-15	using System.Reflection;
-16	
-17	namespace DataAccessLayer.Repositories.BaseRepositories
-18	{
-19	    public class BaseRepository<T> : IRepository<T, Expression<Func<T, bool>>>
-20	        where T : class
-21	    {
-22	        protected readonly IMongoCollection<T> _collection;
-23	        protected readonly IMongoDatabase _database;
-24	
-25	        public BaseRepository(IOptions<MongoDbConfiguration> mongoDbConfigurationOptions, IStringLocalizer<Resource> stringLocalizer)
-26	        {
-27	            var mongoDbConfiguration = mongoDbConfigurationOptions.Value
-28	                ?? throw new ArgumentNullException(nameof(mongoDbConfigurationOptions));
-29	
-30	            var client = new MongoClient(mongoDbConfiguration.ConnectionString);
-31	            _database = client.GetDatabase(mongoDbConfiguration.DbName);
-32	
-33	            var collectionName = typeof(T).GetCustomAttribute<CollectionNameAttribute>()?.CollectionName ??
-34	                throw new ArgumentException(string.Format(stringLocalizer["{0} does not specify collection name. Add CollectionNameAttribute."].Value, typeof(T).Name));
-35	            _collection = _database.GetCollection<T>(collectionName);
-36	        }
-37	
-38	        public virtual async Task<T> CreateAsync(T entity, CancellationToken cancellationToken = default)
-39	        {
-40	            await _collection.InsertOneAsync(entity, cancellationToken: cancellationToken);
-41	            return entity;
-42	        }
-43	
-44	        public virtual Task<T?> ReadByIdAsync(EntityIds id, CancellationToken cancellationToken = default)
-45	        {
-46	            return InternalReadByIdAsync(id, cancellationToken);
-47	        }
-48	
-49	        public virtual async Task<IEnumerable<T>> ReadByPredicateAsync(Expression<Func<T, bool>> predicate, int take, int skip, CancellationToken cancellationToken = default)
-50	        {
-51	            var filter = EditExpression<T>.RemoveAttributedProperties<BsonIgnoreAttribute>(predicate) ?? (entity => true);
-52	
-53	            return await _collection
-54	                .Find(filter)
-55	                .Skip(skip)
-56	                .Limit(take)
-57	                .ToListAsync(cancellationToken);
-58	        }
-59	
-60	        public virtual async Task<int> CountEntitiesByPredicateAsync(Expression<Func<T, bool>> predicate, int take, int skip, CancellationToken cancellationToken = default)
-61	        {
-62	            var filter = EditExpression<T>.RemoveAttributedProperties<BsonIgnoreAttribute>(predicate) ?? (entity => true);
-63	            return (int)await _collection.Find(filter).Skip(skip).Limit(take).CountDocumentsAsync(cancellationToken);
-64	        }
-65	
-66	        public virtual async Task<T> UpdateAsync(T entity, CancellationToken cancellationToken = default)
-67	        {
-68	            var id = GeneralIdExtractor<T, KeyAttribute>.GetId(entity);
-69	            var filter = GetFilterDefinition(id);
-70	            await _collection.ReplaceOneAsync(filter, entity, cancellationToken: cancellationToken);
-71	            return entity;
-72	        }
-73	
-74	        public virtual async Task<bool> DeleteAsync(EntityIds id, CancellationToken cancellationToken = default)
-75	        {
-76	            var filter = GetFilterDefinition(id);
-77	            var result = await _collection.DeleteOneAsync(filter, cancellationToken);
-78	            return result.DeletedCount > 0;
-79	        }
-80	
-81	        public virtual async Task<bool> DeleteSeveralAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
-82	        {
-83	            var result = await _collection.DeleteManyAsync(predicate, cancellationToken);
-84	            return result.DeletedCount > 0;
-85	        }
-86	
-87	        protected FilterDefinition<T>? GetFilterDefinition(EntityIds id)
-88	        {
-89	            var filterBuilder = Builders<T>.Filter;
-90	            FilterDefinition<T>? filter = null;
-91	
-92	            foreach (var keyValuePair in id)
-93	            {
-94	                if (filter is null)
-95	                {
-96	                    filter = filterBuilder.Eq(keyValuePair.Key, keyValuePair.Value);
-97	                }
-98	                else
-99	                {
-100	                    filter &= filterBuilder.Eq(keyValuePair.Key, keyValuePair.Value);
-101	                }
-102	            }
-103	
-104	            return filter;
-105	        }
-106	
-107	        private async Task<T?> InternalReadByIdAsync(EntityIds id, CancellationToken cancellationToken = default)
-108	        {
-109	            var filter = GetFilterDefinition(id);
-110	
-111	            return await _collection.Find(filter).FirstOrDefaultAsync(cancellationToken);
-112	        }
-113	
-114	        public virtual Task<T?> ReadByIdAsync(EntityIds id, string localizationCode, CancellationToken cancellationToken = default)
-115	        {
-116	            return ReadByIdAsync(id, cancellationToken);
-117	        }
-118	
-119	        public virtual Task<IEnumerable<T>> ReadByPredicateAsync(Expression<Func<T, bool>> predicate, int take, int skip, string localizationCode, CancellationToken cancellationToken = default)
-120	        {
-121	            return ReadByPredicateAsync(predicate, take, skip, cancellationToken);
-122	        }
-123	
-124	        public virtual Task<int> CountEntitiesByPredicateAsync(Expression<Func<T, bool>> predicate, int take, int skip, string localizationCode, CancellationToken cancellationToken = default)
-125	        {
-126	            return CountEntitiesByPredicateAsync(predicate, take, skip, cancellationToken);
-127	        }
-128	
-129	        public virtual async Task<IEnumerable<T>> ReadByPredicateAsync(Expression<Func<T, bool>> predicate, int take, int skip, IDictionary<Expression<Func<T, object>>, bool> orderBy, CancellationToken cancellationToken = default)
-130	        {
-131	            var filter = EditExpression<T>.RemoveAttributedProperties<BsonIgnoreAttribute>(predicate) ?? (entity => true);
-132	
-133	            var filteredCollection = _collection
-134	                    .Find(filter)
-135	                    .Skip(skip)
-136	                    .Limit(take);
-137	
-138	            foreach (var keyValue in orderBy)
-139	            {
-140	                filteredCollection = keyValue.Value ? 
-141	                    filteredCollection.SortByDescending(keyValue.Key)
-142	                    :
-143	                    filteredCollection.SortBy(keyValue.Key);
-144	            }
-145	
-146	            return await filteredCollection.ToListAsync();
-147	        }
-148	
-149	        public virtual Task<T> CreateAsync(T entity, string localizationCode, CancellationToken cancellationToken = default)
-150	        {
-151	            return CreateAsync(entity, cancellationToken);
-152	        }
-153	
-154	        public virtual Task<T> UpdateAsync(T entity, string localizationCode, CancellationToken cancellationToken = default)
-155	        {
-156	            return UpdateAsync(entity, cancellationToken);
-157	        }
-158	    }
-159	}
+Додаток В
 
-ДОДАТОК В
-
-Базовий клас сервісів
+View Model для роботи з сутностями
 
 1	using AutoMapper;
-2	using BusinessLogicLayer.Abstractions.BaseInterfaces;
-3	using BusinessLogicLayer.Entities.Pagination;
-4	using BusinessLogicLayer.Helpers;
-5	using Core.Constants;
-6	using Core.EntityHelpers;
-7	using Core.Localizations;
-8	using DataAccessLayer.Abstractions;
-9	using Microsoft.Extensions.Localization;
-10	using System.Linq.Expressions;
-11	
-12	namespace BusinessLogicLayer.Services.BaseServices
-13	{
-14	    public class BaseCrudService<T, TIdDto, TDetailedDto, TCreateDto, TUpdateDto, TIdAttribute> : ICrudService<T, TIdDto, TDetailedDto, TCreateDto, TUpdateDto>
-15	        where TIdAttribute : Attribute
-16	        where T : ICloneable
-17	    {
-18	        protected readonly IMapper _mapper;
-19	        protected readonly IUnitOfWork _unitOfWork;
-20	        private readonly IStringLocalizer<Resource> _stringLocalizer;
-21	        private IRepository<T, Expression<Func<T, bool>>>? _repository;
-22	        private readonly Dictionary<Type, object> _specificRepositories = new Dictionary<Type, object>();
-23	
-24	        public BaseCrudService(
-25	            IMapper mapper,
-26	            IUnitOfWork unitOfWork,
-27	            IStringLocalizer<Resource> stringLocalizer
-28	            )
-29	        {
-30	            _mapper = mapper;
-31	            _unitOfWork = unitOfWork;
-32	            _stringLocalizer = stringLocalizer;
-33	        }
-34	
-35	        public virtual async Task<TDetailedDto> CreateEntityAsync(TCreateDto newEntity, CancellationToken cancellationToken = default)
-36	        {
-37	            var createdEntity = await (await GetRepositoryAsync(cancellationToken))
-38	                .CreateAsync(_mapper.Map<T>(newEntity), cancellationToken);
-39	            return _mapper.Map<TDetailedDto>(createdEntity);
-40	        }
-41	
-42	        public virtual async Task DeleteEntityAsync(TIdDto ids, CancellationToken cancellationToken = default)
-43	        {
-44	            await (await GetRepositoryAsync()).DeleteAsync(GeneralIdExtractor<TIdDto, TIdAttribute>.GetId(ids), cancellationToken);
-45	        }
-46	
-47	        public virtual async Task<IEnumerable<TDetailedDto>> ReadEntitiesByPredicateAsync(Expression<Func<T, bool>> predicate, PaginationParameters paginationParameters, CancellationToken cancellationToken = default)
-48	        {
-49	            var fetchedEntities = await (await GetRepositoryAsync(cancellationToken))
-50	                .ReadByPredicateAsync(predicate, paginationParameters.GetTake(), paginationParameters.GetSkip(), cancellationToken);
-51	
-52	            return _mapper.Map<IEnumerable<TDetailedDto>>(
-53	                fetchedEntities
-54	            );
-55	        }
-56	
-57	        public virtual async Task<TDetailedDto?> ReadEntityByIdAsync(TIdDto ids, CancellationToken cancellationToken = default)
-58	        {
-59	            return _mapper.Map<TDetailedDto?>(
-60	                await (await GetRepositoryAsync(cancellationToken))
-61	                .ReadByIdAsync(GeneralIdExtractor<TIdDto, TIdAttribute>.GetId(ids), cancellationToken));
-62	        }
-63	
-64	        public virtual async Task<TDetailedDto> UpdateEntityAsync(TUpdateDto newEntity, CancellationToken cancellationToken = default)
-65	        {
-66	            var id = GeneralIdExtractor<TUpdateDto, TIdAttribute>.GetId(newEntity);
-67	            var oldEntity = await (await GetRepositoryAsync(cancellationToken)).ReadByIdAsync(id, cancellationToken);
-68	
-69	            if (oldEntity is null)
-70	            {
-71	                throw new ArgumentException(string.Format(_stringLocalizer["There is no {0} with {1} id."].Value, typeof(T).Name, id.ToString()));
-72	            }
-73	            UpdateHelper<TUpdateDto, T>.ReplaceUpdatedProperties(newEntity, oldEntity);
-74	            return _mapper.Map<TDetailedDto>(await (await GetRepositoryAsync(cancellationToken)).UpdateAsync(oldEntity, cancellationToken));
-75	        }
-76	
-77	        public virtual Task<IEnumerable<TDetailedDto>> ReadAllEntitiesAsync(CancellationToken cancellationToken = default)
-78	        {
-79	            return ReadEntitiesByPredicateAsync(entity => true, PaginationParameters.All(), cancellationToken);
-80	        }
-81	
-82	        public virtual async Task<TDetailedDto?> ReadEntityByIdAsync(TIdDto id, string localizationCode, CancellationToken cancellationToken = default)
-83	        {
-84	            return _mapper.Map<TDetailedDto?>(
-85	                await (await GetRepositoryAsync(cancellationToken))
-86	                .ReadByIdAsync(GeneralIdExtractor<TIdDto, TIdAttribute>.GetId(id), localizationCode, cancellationToken));
+2	using CommunityToolkit.Mvvm.ComponentModel;
+3	using CommunityToolkit.Mvvm.Input;
+4	using System.Windows.Input;
+5	using VetAutoMobile.ApiLayer.Abstractions;
+6	using VetAutoMobile.ViewModels.BaseViewModels;
+7	
+8	namespace VetAutoMobile.ViewModels
+9	{
+10	    public partial class EntityBaseViewModel<T, TId, TCreation, TUpdate> : BaseViewModel
+11	        where T : class
+12	        where TCreation : new()
+13	    {
+14	        protected readonly IEntityApiService<T, TId, TCreation, TUpdate> _apiService;
+15	        protected readonly IMapper _mapper;
+16	        [ObservableProperty]
+17	        private T? _currentEntity;
+18	        [ObservableProperty]
+19	        private TCreation? _newEntity = new TCreation();
+20	        [ObservableProperty]
+21	        private bool _isCreating = false;
+22	        [ObservableProperty]
+23	        private IEnumerable<T> _entities = new List<T>();
+24	
+25	        public ICommand Loaded { get; set; }
+26	        public ICommand GetEntities { get; set; }
+27	        public ICommand GetEntity { get; set; }
+28	        public ICommand Update { get; set; }
+29	        public ICommand Create { get; set; }
+30	        public ICommand ToCreate { get; set; }
+31	        public ICommand BackToList { get; set; }
+32	
+33	        public bool IsCurrentEntitySet => !IsCreating && CurrentEntity is not null;
+34	        public bool IsCurrentEntityNotSet => !IsCreating && CurrentEntity is null;
+35	
+36	        public EntityBaseViewModel(IEntityApiService<T, TId, TCreation, TUpdate> apiService, IMapper mapper)
+37	        {
+38	            _apiService = apiService;
+39	            _mapper = mapper;
+40	
+41	            Loaded = new AsyncRelayCommand(LoadAsync);
+42	            GetEntities = new AsyncRelayCommand(GetEntitiesAsync);
+43	            GetEntity = new AsyncRelayCommand<SelectedItemChangedEventArgs>(GetCurrentEntityAsync);
+44	            Update = new AsyncRelayCommand(UpdateAsync);
+45	            Create = new AsyncRelayCommand(CreateAsync);
+46	            ToCreate = new RelayCommand(ToCreatePage);
+47	            BackToList = new AsyncRelayCommand(BackToListAsync);
+48	        }
+49	
+50	        partial void OnCurrentEntityChanged(T? oldValue, T? newValue)
+51	        {
+52	            OnPropertyChanged(nameof(IsCurrentEntitySet));
+53	            OnPropertyChanged(nameof(IsCurrentEntityNotSet));
+54	        }
+55	
+56	        partial void OnIsCreatingChanged(bool oldValue, bool newValue)
+57	        {
+58	            OnPropertyChanged(nameof(IsCurrentEntitySet));
+59	            OnPropertyChanged(nameof(IsCurrentEntityNotSet));
+60	        }
+61	
+62	        private async Task GetEntitiesAsync()
+63	        {
+64	            Entities = await _apiService.GetAllAsync(); 
+65	        }
+66	
+67	        protected virtual async Task GetCurrentEntityAsync(SelectedItemChangedEventArgs? args)
+68	        {
+69	            var entity = args?.SelectedItem as T;
+70	
+71	            if (entity is null)
+72	            {
+73	                return;
+74	            }
+75	
+76	            CurrentEntity = await _apiService.GetByIdAsync(_mapper.Map<TId>(entity));
+77	        }
+78	
+79	        protected virtual Task LoadAsync()
+80	        {
+81	            return GetEntitiesAsync();
+82	        }
+83	
+84	        protected virtual Task UpdateAsync()
+85	        {
+86	            return _apiService.UpdateAsync(_mapper.Map<TUpdate>(CurrentEntity));
 87	        }
 88	
-89	        public async Task<IEnumerable<TDetailedDto>> ReadEntitiesByPredicateAsync(Expression<Func<T, bool>> predicate, PaginationParameters paginationParameters, string localizationCode, CancellationToken cancellationToken = default)
+89	        protected virtual async Task CreateAsync()
 90	        {
-91	            var fetchedEntities = await (await GetRepositoryAsync(cancellationToken))
-92	                .ReadByPredicateAsync(predicate, paginationParameters.GetTake(), paginationParameters.GetSkip(), localizationCode, cancellationToken);
-93	
-94	            return _mapper.Map<IEnumerable<TDetailedDto>>(fetchedEntities);
-95	        }
-96	
-97	        public Task<IEnumerable<TDetailedDto>> ReadAllEntitiesAsync(string localizationCode, CancellationToken cancellationToken = default)
-98	        {
-99	            return ReadEntitiesByPredicateAsync(entity => true, PaginationParameters.All(), localizationCode, cancellationToken);
+91	            await _apiService.CreateAsync(NewEntity!); 
+92	            await GetEntitiesAsync();
+93	            IsCreating = false;
+94	        }
+95	
+96	        private void ToCreatePage()
+97	        {
+98	            NewEntity = new TCreation();
+99	            IsCreating = true;
 100	        }
 101	
-102	        public async Task<IEnumerable<TDetailedDto>> ReadEntitiesByPredicateAsync(Expression<Func<T, bool>> predicate, PaginationParameters paginationParameters, IDictionary<string, string> orderBy, CancellationToken cancellationToken = default)
+102	        private Task BackToListAsync()
 103	        {
-104	            var mappedOrderBy = orderBy
-105	                .Select(keyValue =>
-106	                {
-107	                    if (!keyValue.Key.Contains(OrderByConstants.Postfix))
-108	                    {
-109	                        return new KeyValuePair<Expression<Func<T, object>>, bool>();
-110	                    }
-111	
-112	                    var propertyExpression = GeneralIdExtractor<T, TIdAttribute>.GetPropertyExpression(keyValue.Key.Replace(OrderByConstants.Postfix, ""));
-113	                    if (propertyExpression is null)
-114	                    {
-115	                        throw new ArgumentException(string.Format(_stringLocalizer["There is no {0} property"].Value, keyValue.Key));
-116	                    }
-117	                    return new KeyValuePair<Expression<Func<T, object>>, bool>(propertyExpression, keyValue.Value == OrderByConstants.Descending);
-118	                })
-119	                .Where(kv => kv.Key != null)
-120	                .ToDictionary(kv => kv.Key, kv => kv.Value);
-121	
-122	            var fetchedEntities = await (await GetRepositoryAsync(cancellationToken))
-123	                .ReadByPredicateAsync(predicate, paginationParameters.GetTake(), paginationParameters.GetSkip(), mappedOrderBy, cancellationToken);
-124	
-125	            return _mapper.Map<IEnumerable<TDetailedDto>>(fetchedEntities);
-126	        }
-127	
-128	        protected async Task<IRepository<T, Expression<Func<T, bool>>>> GetRepositoryAsync(CancellationToken cancellationToken = default)
-129	        {
-130	            _repository ??= await _unitOfWork.GetRepositoryAsync<T, Expression<Func<T, bool>>>(cancellationToken);
-131	            return _repository;
-132	        }
-133	
-134	        protected async Task<TSpecificRepository> GetSpecificRepositoryAsync<TSpecificRepository>(CancellationToken cancellationToken = default)
-135	        {
-136	            if (!_specificRepositories.TryGetValue(typeof(TSpecificRepository), out object? repository) && repository is null)
-137	            {
-138	                repository = await _unitOfWork.GetSpecificRepository<TSpecificRepository>(cancellationToken);
-139	            }
-140	            return (TSpecificRepository)repository!;
-141	        }
-142	
-143	        public async Task<IEnumerable<TDetailedDto>> ReadEntitiesByPredicateAsync(Expression<Func<T, bool>> predicate, PaginationParameters paginationParameters, IDictionary<Expression<Func<T, object>>, bool> orderBy, CancellationToken cancellationToken = default)
-144	        {
-145	            return _mapper.Map<IEnumerable<TDetailedDto>>(await (await GetRepositoryAsync(cancellationToken))
-146	                .ReadByPredicateAsync(predicate, paginationParameters.GetTake(), paginationParameters.GetSkip(), orderBy, cancellationToken));
-147	        }
-148	    }
-149	}
+104	            CurrentEntity = null;
+105	            return GetEntitiesAsync();
+106	        }
+107	    }
+108	}
 
-ДОДАТОК Г
+Додаток Г
 
-Конвеєрна частина обробки помилок
+AppShell (демонстрація роботи Guards)
+
+1	using VetAutoMobile.Abstractions.Pages;
+2	using VetAutoMobile.Entities.Guards;
+3	using VetAutoMobile.ViewModels.AppViewModels;
+4	
+5	namespace VetAutoMobile
+6	{
+7	    public partial class AppShell : Shell
+8	    {
+9	        public AppShell(IEnumerable<IEntityWithGuards> pages, AppShellViewModel viewModel)
+10	        {
+11	            InitializeComponent();
+12	
+13	            BindingContext = viewModel;
+14	
+15	            Items.Clear();
+16	
+17	            foreach (var page in pages)
+18	            {
+19	                HandleGuards(page);
+20	            }
+21	        }
+22	
+23	        private void HandleGuards(IEntityWithGuards page)
+24	        {
+25	            var pageAsContentPage = page as ContentPage;
+26	            if (pageAsContentPage is null)
+27	            {
+28	                return;
+29	            }
+30	
+31	            var flyoutItem = new FlyoutItem();
+32	
+33	            flyoutItem.Items.Add(pageAsContentPage);
+34	            flyoutItem.Title = pageAsContentPage.Title;
+35	
+36	            if (page.Guards.Contains(Guard.LoginRequired))
+37	            {
+38	                flyoutItem.SetBinding(FlyoutItem.IsVisibleProperty, nameof(AppShellViewModel.IsLoggedIn));
+39	            }
+40	            if (page.Guards.Contains(Guard.OnlyIfLogout))
+41	            {
+42	                flyoutItem.SetBinding(FlyoutItem.IsVisibleProperty, nameof(AppShellViewModel.IsLoggedOut));
+43	            }
+44	
+45	            Items.Add(flyoutItem);
+46	        }
+47	    }
+48	}
+
+Додаток Д
+
+Сервіс конфігурації
 
 1	using Microsoft.Extensions.Options;
-2	using System.Text;
-3	using VetAuto.Models;
-4	
-5	namespace VetAuto.Middlewares
-6	{
-7	    public class ErrorHandlingMiddleware
-8	    {
-9	        private const string PLAIN_TEXT_CONTENT_TYPE = "text/plain";
-10	
-11	        private readonly RequestDelegate _next;
+2	using Newtonsoft.Json;
+3	using System.Net;
+4	using System.Net.Sockets;
+5	using System.Text;
+6	using VetAutoMobile.ApiLayer.Abstractions;
+7	using VetAutoMobile.ApiLayer.Entities;
+8	using VetAutoMobile.ApiLayer.Entities.AuthorizationConfigurations;
+9	using VetAutoMobile.ApiLayer.Entities.EndpointConfigurations;
+10	using VetAutoMobile.ApiLayer.Entities.EndpointConfigurations.EntityEndpointConfigurations;
+11	using VetAutoMobile.ApiLayer.Entities.HttpClientConfigurations;
 12	
-13	        public ErrorHandlingMiddleware(RequestDelegate next)
-14	        {
-15	            _next = next;
-16	        }
-17	
-18	        public async Task InvokeAsync(HttpContext httpContext)
-19	        {
-20	            try
-21	            {
-22	                await _next(httpContext);
-23	            }
-24	            catch (Exception ex)
-25	            {
-26	                Error error = ex switch
-27	                {
-28	                    ArgumentException aex => new Error(400, aex.Message),
-29	                    InvalidOperationException iex => new Error(400, iex.Message),
-30	                    _ => new Error(500, ex.Message),
-31	                };
-32	
-33	                await WriteResponseAsync(httpContext, error);
-34	            }
-35	        }
-36	
-37	        private async Task WriteResponseAsync(HttpContext httpContext, Error error)
-38	        {
-39	            httpContext.Response.StatusCode = error.StatusCode;
-40	            httpContext.Response.Headers["Content-Type"] = PLAIN_TEXT_CONTENT_TYPE;
-41	            await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(error.Message));
-42	        }
-43	    }
-44	
-45	    public static class ErrorHandlingMiddlewareExtensions
-46	    {
-47	        public static WebApplication UseErrorHandling(this WebApplication app)
-48	        {
-49	            app.UseMiddleware<ErrorHandlingMiddleware>();
-50	            return app;
-51	        }
-52	    }
-53	}
+13	namespace VetAutoMobile.ApiLayer
+14	{
+15	    public class ConfigurationService : IConfigurationService
+16	    {
+17	        private readonly DeviceConfiguration _deviceConfiguration;
+18	        private readonly HttpClientConfiguration _httpClientConfiguration;
+19	        private readonly AuthorizationConfiguration _authorizationConfiguration;
+20	        private FeederEndpointConfiguration _feederEndpointConfiguration;
+21	
+22	        public ConfigurationService(
+23	            IOptions<DeviceConfiguration> deviceConfigurationOptions, 
+24	            IOptions<HttpClientConfiguration> httpClientConfigurationOptions,
+25	            IOptions<FeederEndpointConfiguration> feederEndpointConfigurationOptions,
+26	            AuthorizationConfiguration authorizationConfiguration)
+27	        {
+28	            _deviceConfiguration = deviceConfigurationOptions.Value ?? throw new ArgumentNullException(nameof(deviceConfigurationOptions));
+29	            _httpClientConfiguration = httpClientConfigurationOptions.Value ?? throw new ArgumentNullException(nameof(httpClientConfigurationOptions));
+30	            _feederEndpointConfiguration = feederEndpointConfigurationOptions.Value ?? throw new ArgumentNullException(nameof(feederEndpointConfigurationOptions));
+31	            _authorizationConfiguration = authorizationConfiguration;
+32	        }
+33	        public Task ConfigureDevicesAsync()
+34	        {
+35	            return Task.Run(() =>
+36	            {
+37	                var thread = new Thread(SendConfiguration);
+38	                thread.Start();
+39	                thread.Join();
+40	            });
+41	        }
+42	
+43	        private void SendConfiguration()
+44	        {
+45	            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+46	            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, true);
+47	
+48	            socket.SendTo(Encoding.UTF8.GetBytes(GetConfigurationString()), new IPEndPoint(
+49	
+50	#if DEBUG
+51	                IPAddress.Parse("10.0.2.2"),
+52	#else
+53	                IPAddress.Broadcast,
+54	#endif
+55	
+56	                _deviceConfiguration.Port));
+57	        }
+58	
+59	        private string GetConfigurationString() =>
+60	            JsonConvert.SerializeObject(
+61	                new DeviceEndpointConfiguration
+62	                {
+63	                    AccessToken = _authorizationConfiguration.AccessToken!,
+64	                    AnimalFeederEndpoint = _feederEndpointConfiguration.CreateAnimalFeeder,
+65	                    BaseUrl = _httpClientConfiguration.BaseUrl,
+66	                    FeederByCoordinatesEndpoint = _feederEndpointConfiguration.GetByCoordinates,
+67	                    FeederEndpoint = _feederEndpointConfiguration.CreateEndpoint
+68	                }
+69	            ) + "<EOM>";
+70	    }
+71	}
