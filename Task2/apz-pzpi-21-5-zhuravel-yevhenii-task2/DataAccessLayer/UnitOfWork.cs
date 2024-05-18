@@ -1,6 +1,5 @@
 ﻿using Core.Localizations;
 using DataAccessLayer.Abstractions;
-using DataAccessLayer.Repositories.BaseRepositories;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
@@ -32,6 +31,7 @@ namespace DataAccessLayer
         }
 
         public Task<IRepository<T, TPredicate>> GetRepositoryAsync<T, TPredicate>(CancellationToken cancellationToken = default)
+            where T : class
         {
             var repositoryInterfaceType = typeof(IRepository<T, TPredicate>);
 

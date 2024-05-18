@@ -35,7 +35,7 @@ namespace VetAuto.Controllers
 
             return Ok(await _crudService.ReadEntitiesByPredicateAsync(
                 e => true,
-                new PaginationParameters(animalTypeFilter.Page, animalTypeFilter.PageCount),
+                new PaginationParameters(animalTypeFilter.Page, animalTypeFilter.PageCount == 0 ? 10 : animalTypeFilter.PageCount),
                 orderBys,
                 cancellationToken));
         }
@@ -69,7 +69,7 @@ namespace VetAuto.Controllers
 
             return Ok(await _crudService.ReadEntitiesByPredicateAsync(
                 predicate,
-                new PaginationParameters(filter.Page, filter.PageCount),
+                new PaginationParameters(filter.Page, filter.PageCount == 0 ? 10 : filter.PageCount),
                 orderBys,
                 cancellationToken));
         }

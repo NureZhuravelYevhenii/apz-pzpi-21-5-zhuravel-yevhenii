@@ -1,6 +1,7 @@
 ﻿using BusinessLogicLayer.Abstractions;
 using BusinessLogicLayer.Abstractions.BaseInterfaces;
 using BusinessLogicLayer.Entities.Feeders;
+using BusinessLogicLayer.Entities.Pagination;
 using Core.Constants;
 using DataAccessLayer.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -54,6 +55,14 @@ namespace VetAuto.Controllers
         public async Task<IActionResult> GetMostPopularDayOfWeekForFeederAsync(Guid id, CancellationToken cancellationToken)
         {
             return Ok((await _animalFeederService.GetMostPopularDayOfWeekForFeederAsync(id, cancellationToken)).ToString());
+        }
+
+        [HttpGet("by-coordinates")]
+        public async Task<IActionResult> GetFeedersByCoordinatesAsync([FromQuery] string coordinates, CancellationToken cancellationToken)
+        {
+            var feeders = await _crudService.ReadAllEntitiesAsync(cancellationToken);
+
+            return Ok(feeders.Where(f => string.Join(' ', f.Location.Coordinates) == coordinates));
         }
     }
 }

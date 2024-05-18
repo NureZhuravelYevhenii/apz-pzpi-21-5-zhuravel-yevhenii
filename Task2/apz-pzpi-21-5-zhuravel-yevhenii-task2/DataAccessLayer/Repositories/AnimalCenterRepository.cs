@@ -73,8 +73,8 @@ namespace DataAccessLayer.Repositories
                 "animal-center-view",
                 "animal-centers",
                 new EmptyPipelineDefinition<AnimalCenter>()
-                    .Lookup<AnimalCenter, AnimalCenter, Animal, Animal[]>(_database.GetCollection<Animal>("animals"), "_id", "AnimalCenterId", "animals")
-                    .Project<AnimalCenter, Animal[], AnimalCenter>(viewProject)
+                    .Lookup<AnimalCenter, AnimalCenter, Animal, IEnumerable<Animal>>(_database.GetCollection<Animal>("animals"), "_id", "AnimalCenterId", "animals")
+                    .Project<AnimalCenter, IEnumerable<Animal>, AnimalCenter>(viewProject)
                 );
 
             var view = _database.GetCollection<AnimalCenter>("animal-center-view");

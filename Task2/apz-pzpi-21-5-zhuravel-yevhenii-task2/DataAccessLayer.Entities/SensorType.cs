@@ -12,6 +12,9 @@ namespace DataAccessLayer.Entities
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
 
+        [BsonIgnore]
+        public IEnumerable<Sensor> Sensors { get; set; } = new List<Sensor>();
+
         public object Clone()
         {
             return MemberwiseClone();

@@ -15,6 +15,7 @@ namespace DataAccessLayer.Entities
         public string RefreshToken { get;set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
         public string Info { get; set; } = string.Empty;
+
         public ICollection<Animal> Animals { get; set; } = new List<Animal>();
 
         public object Clone()

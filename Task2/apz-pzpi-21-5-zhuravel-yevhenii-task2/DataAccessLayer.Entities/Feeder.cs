@@ -13,6 +13,9 @@ namespace DataAccessLayer.Entities
         public GeoPoint Location { get; set; } = null!;
         public Guid AnimalCenterId { get; set; }
 
+        [BsonIgnore]
+        public IEnumerable<AnimalFeeder> AnimalFeeders { get; set; } = new List<AnimalFeeder>();
+
         public object Clone()
         {
             return MemberwiseClone();

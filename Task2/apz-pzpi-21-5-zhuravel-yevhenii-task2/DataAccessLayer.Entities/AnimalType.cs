@@ -12,6 +12,9 @@ namespace DataAccessLayer.Entities
         public Guid Id { get; set; }
         public string Name { get; set; } = string.Empty;
 
+        [BsonIgnore]
+        public IEnumerable<Animal> Animals { get; set; } = new List<Animal>();
+
         public object Clone()
         {
             return MemberwiseClone();

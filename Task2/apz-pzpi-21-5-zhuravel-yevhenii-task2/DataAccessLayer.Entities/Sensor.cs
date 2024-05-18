@@ -14,6 +14,13 @@ namespace DataAccessLayer.Entities
         public Guid TypeId { get; set; }
         public Guid AnimalCenterId { get; set; }
 
+        [BsonIgnore]
+        public Animal Animal { get; set; } = null!;
+        [BsonIgnore]
+        public SensorType SensorType { get; set; } = null!;
+        [BsonIgnore]
+        public AnimalCenter AnimalCenter { get; set; } = null!;
+
         public object Clone()
         {
             return MemberwiseClone();

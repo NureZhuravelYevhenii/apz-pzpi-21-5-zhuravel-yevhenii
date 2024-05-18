@@ -1,5 +1,6 @@
 ﻿using DataAccessLayer.Entities.Attributes;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel.DataAnnotations;
 
 namespace DataAccessLayer.Entities
@@ -7,11 +8,11 @@ namespace DataAccessLayer.Entities
     [CollectionName("animals-feeders")]
     public class AnimalFeeder : ICloneable
     {
-        public ObjectId Id { get; set; }
+        [BsonId]
+        [Key]
+        public Guid Id { get; set; }
 
-        [Key]
         public Guid AnimalId { get; set; }
-        [Key]
         public Guid FeederId { get; set; }
         public double AmountOfFood { get; set; }
 
@@ -22,7 +23,10 @@ namespace DataAccessLayer.Entities
             set => _feedDate = value;
         }
 
+        [BsonIgnore]
         public Feeder Feeder { get; set; } = null!;
+        [BsonIgnore]
+        public Animal Animal { get; set; } = null!;
 
         public object Clone()
         {

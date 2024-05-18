@@ -8,6 +8,7 @@ namespace VetAuto
         {
             serviceCollection.Configure<JwtConfiguration>(configuration.GetSection("JwtConfiguration"));
             serviceCollection.Configure<MongoDbConfiguration>(configuration.GetSection("MongoDbConfiguration"));
+            serviceCollection.Configure<AdoNetConfiguration>(configuration.GetSection("AdoNetConfiguration"));
         }
     }
 }

@@ -1,0 +1,294 @@
+РОЗРОБКА IOT ЧАСТИНИ ПРОГРАМНОЇ СИСТЕМИ
+
+Мета роботи:
+Покращити навички проектування програмних систем. Розробити smart device частину програмної системи та описати її з допомогою демонстраційного відеоролику, UML Use Case Diagram, Interaction Overview Diagram, Activity Diagram та Package Diagram.
+
+Хід роботи:
+Демо ролик проєкту доступний за посиланням (https://youtu.be/vwyTdBXm6Pk).
+Посилання на репозиторій програмної системи: https://github.com/NureZhuravelYevhenii/apz-pzpi-21-5-zhuravel-yevhenii .
+
+1 АРХІТЕКТУРА ТА ІНЖЕНЕРНІ РІШЕННЯ
+
+Програмне забезпечення для IoT девайсу представляє собою моноліт для годівниці, що складається з декількох бібліотек-шарів, таких як: бібліотеки з основним функціоналом годівниці, бібліотеки для з’єднання з API, UI бібліотеки, в якій знаходяться класи що реалізують шаблон Command, які в подальшому можна прив’язати до елементів справжнього девайсу, а також бібліотека загальної функціональності, в якій знаходяться моделі конфігурації. Для всіх бібліотек представлені бібліотеки абстракцій, для дотримання принципу SOLID Dependency Inversion.
+
+1.1	ШАР ОСНОВНОЇ ФУНКЦІОНАЛЬНОСТІ 
+
+Шар, що включає в себе реалізацію методів створення сеансів годування тварини, мається на увазі в фіксування моменту підходу тварини, кількості корму, яка зникла з годівниці, та після відходу від годівниці – відправлення даних на сервер. Ця бібліотека використовує бібліотеки для з’єднання з API а також отримує конфігурацію через Dependency Injection, або конфігурує модель конфігурації з допомогою отримання по Socket конфігурації з мобільного додатку.
+
+1.2	ШАР З’ЄДНАННЯ З API
+
+Шар, що дає спосіб звертання до API, конкретно створення моделі годівниці на сервері, отримання моделі годівниці, вказавши її координати, а також створення сеансу годування тварини. Шар використовує бібліотеку загальної функціональності та конфігурацію, яку отримує через Dependency Injection.
+
+1.3	ШАР UI
+
+Шар що містить реалізації команд, які можуть бути зв’язані з елементами керування пристрою (в даній реалізації для спрощення тестування використовувався консольний додаток). Шар містить такі команди як: тварина підходить, тварина їсть, тварина відходить, завершення роботи, конфігурування з’єднання з API, конфігурування параметрів годівниці. Також в цьому шарі знаходиться файл запуску, який містить реєстрацію сервісів в контейнер.
+
+1.4	ШАР ЗАГАЛЬНОЇ ФУНКЦІОНАЛЬНОСТІ
+
+Шар містить моделі конфігурації додатку і клас, що реалізовує шаблон Fabric для створення HttpClient, для використання його в інших частинах програми. Також до цього шару відноситься шар зберігання конфігурацій, що надає конфігурацію при створенні моделі в ServiceProvider та зберігає конфігурацію при коректному завершені роботи.
+
+1.6	ЗАГАЛЬНА ІНФОРМАЦІЯ
+
+Для більшості шарів створені бібліотеки інтерфейсів, що дають можливість відповідати принципу Solid Dependency Inversion, та залежати лише від абстракції, при цьому з можливістю заміни реалізації з допомогою налаштування стандартного контейнеру залежностей Microsoft, що допомагає реєструвати сервіси ефективніше.
+
+2	ДІАГРАМА ДІЯЛЬНОСТИ ТА ДІАГРАМА ВЗАЄМОДІЇ
+
+Було сформовано діаграму діяльности (додаток А) та взаємодії (додаток Б), що показують можливі варіанти взаємодії з приладом.
+
+3	ДІАГРАМА ПРЕЦЕДЕНТІВ
+
+Для розуміння ситуацій використання програмної системи була сформована діаграма прецедентів (рис. 1). Система має два види користувачів: Користувач, що налаштовує пристрій, та тварини, що ним користуються.
+
+4	ДІАГРАМА ПАКЕТІВ
+
+Була створена діаграма пакетів IoT частини проєкту (рис. 2). Ця частина проєкту складається з таких пакетів як VetAutoIoT.ApiLayer, VetAutoIoT.Core, VetAutoIoT.Console, VetAutoIoT.Persistence та VetAutoIoT. Вся їх функціональність була описана в попередніх розділах, а залежності показані на рисунку 2.
+
+Висновки:
+Під час виконання лабораторної роботи, я покращив навички проектування програмних систем. Розробив smart device частину програмної системи та описав її з допомогою демонстраційного відеоролику, UML Use Case Diagram, Interaction Overview Diagram, Activity Diagram та Package Diagram.
+
+Додаток А
+
+Діаграма діяльности
+
+Додаток Б
+
+Діаграма взаємодії
+
+Додаток В
+
+Приклад команди
+
+1	using Spectre.Console;
+2	using Spectre.Console.Cli;
+3	using VetAutoIoT.Abstractions;
+4	using VetAutoIoT.Entities.EventArguments;
+5	
+6	namespace VetAutoIoT.Console.Commands
+7	{
+8	    public class AnimalApproachCommand : AsyncCommand
+9	    {
+10	        private readonly IFeederService _feederService;
+11	
+12	        public AnimalApproachCommand(IFeederService feederService)
+13	        {
+14	            _feederService = feederService;
+15	        }
+16	
+17	        public override async Task<int> ExecuteAsync(CommandContext context)
+18	        {
+19	            var id = AnsiConsole.Ask<Guid>("Provide animal id:");
+20	
+21	            await _feederService.AnimalApproachingAsync(new AnimalApproachingArgs
+22	            {
+23	                AnimalId = id
+24	            });
+25	
+26	            return 0;
+27	        }
+28	    }
+29	}
+
+Додаток Г
+
+Сервіс годівниці
+
+1	using VetAutoIoT.Abstractions;
+2	using VetAutoIoT.ApiLayer.Abstractions;
+3	using VetAutoIoT.ApiLayer.Entities;
+4	using VetAutoIoT.Core.Configurations;
+5	using VetAutoIoT.Entities.EventArguments;
+6	
+7	namespace VetAutoIoT
+8	{
+9	    public class FeederService : IFeederService
+10	    {
+11	        private readonly IApiService _apiService;
+12	        private readonly FeederConfiguration _feederConfiguration;
+13	
+14	        public IDictionary<Guid, double> Animals { get; set; } = new Dictionary<Guid, double>();
+15	
+16	        public FeederService(IApiService apiService, FeederConfiguration feederConfiguration)
+17	        {
+18	            _apiService = apiService;
+19	            _feederConfiguration = feederConfiguration;
+20	        }
+21	        
+22	        public Task AnimalApproachingAsync(AnimalApproachingArgs animalApproachingArgs, CancellationToken cancellationToken = default)
+23	        {
+24	            if (!Animals.ContainsKey(animalApproachingArgs.AnimalId))
+25	            {
+26	                Animals.Add(animalApproachingArgs.AnimalId, 0);
+27	            }
+28	            return Task.CompletedTask;
+29	        }
+30	
+31	        public async Task AnimalDepartAsync(AnimalDepartArgs animalDepartArgs, CancellationToken cancellationToken = default)
+32	        {
+33	            if (Animals.ContainsKey(animalDepartArgs.Id))
+34	            {
+35	                var feeder = await _apiService.GetFeederDtoAsync();
+36	                if (feeder is null) 
+37	                {
+38	                    await _apiService.CreateFeederAsync(_feederConfiguration.Latitude, _feederConfiguration.Longitude, cancellationToken);
+39	
+40	                    feeder = await _apiService.GetFeederDtoAsync();
+41	
+42	                    if (feeder is null)
+43	                    {
+44	                        throw new ArgumentException("Seems like you not configure application. Please run \"configure\".");
+45	                    }
+46	                }
+47	                await _apiService.CreateAnimalFeederAsync(new AnimalFeederCreationDto
+48	                {
+49	                    FeederId = feeder.Id,
+50	                    AnimalId = animalDepartArgs.Id,
+51	                    AmountOfFood = Animals[animalDepartArgs.Id],
+52	                });
+53	
+54	                Animals.Remove(animalDepartArgs.Id);
+55	            }
+56	        }
+57	
+58	        public Task AllAnimalDepartAsync(CancellationToken cancellationToken = default)
+59	        {
+60	            var tasks = new List<Task>();
+61	            foreach (var keyValue in Animals)
+62	            {
+63	                tasks.Add(AnimalDepartAsync(new AnimalDepartArgs
+64	                {
+65	                    Id = keyValue.Key,
+66	                }));
+67	            }
+68	
+69	            return Task.WhenAll(tasks);
+70	        }
+71	
+72	        public Task AnimalEatsAsync(AnimalEatsArgs animalEatsArgs, CancellationToken cancellationToken = default)
+73	        {
+74	            if (animalEatsArgs.AmountOfFood > _feederConfiguration.AmountOfFood)
+75	            {
+76	                throw new ArgumentException($"Feeder have no so many food");
+77	            }
+78	
+79	            if (Animals.ContainsKey(animalEatsArgs.Id))
+80	            {
+81	                Animals[animalEatsArgs.Id] += animalEatsArgs.AmountOfFood;
+82	            }
+83	            else
+84	            {
+85	                Animals.Add(animalEatsArgs.Id, animalEatsArgs.AmountOfFood);
+86	            }
+87	
+88	            _feederConfiguration.AmountOfFood -= animalEatsArgs.AmountOfFood;
+89	
+90	            return Task.CompletedTask;
+91	        }
+92	    }
+93	}
+
+Додаток Д
+
+Сервіс конфігурації
+
+1	using Newtonsoft.Json;
+2	using System.Net;
+3	using System.Net.Sockets;
+4	using System.Text;
+5	using VetAutoIoT.Abstractions;
+6	using VetAutoIoT.Core.Configurations;
+7	
+8	namespace VetAutoIoT
+9	{
+10	    public class ConfigurationService : IConfigurationService
+11	    {
+12	        const int DefaultPort = 8888;
+13	
+14	        public async Task<ApiConfiguration?> GetConfigurationAsync(CancellationToken cancellationToken = default)
+15	        {
+16	            using var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+17	            var buffer = new byte[1024];
+18	
+19	            socket.Bind(new IPEndPoint(IPAddress.Any, DefaultPort));
+20	            await socket.ReceiveFromAsync(buffer, new IPEndPoint(IPAddress.Loopback, DefaultPort), cancellationToken);
+21	
+22	            var result = JsonConvert.DeserializeObject<ApiConfiguration>(Encoding.UTF8.GetString(buffer).Split("<EOM>").First());
+23	
+24	#if DEBUG 
+25	            if (result is not null)
+26	            {
+27	                result.BaseUrl = result.BaseUrl.Replace("10.0.2.2", "localhost");
+28	            }
+29	#endif
+30	
+31	            return result;
+32	        }
+33	    }
+34	}
+
+Додаток Е
+
+Сервіс зв’язку з API
+
+1	using System.Net.Http.Json;
+2	using VetAutoIoT.ApiLayer.Abstractions;
+3	using VetAutoIoT.ApiLayer.Entities;
+4	using VetAutoIoT.Core.Abstractions;
+5	using VetAutoIoT.Core.Configurations;
+6	
+7	namespace VetAutoIoT.ApiLayer
+8	{
+9	    public class ApiService : IApiService
+10	    {
+11	        private const string NotConfiguredExceptionMessage = "Seams like you not configured application. Please run configure.";
+12	
+13	        private readonly ApiConfiguration _apiConfiguration;
+14	        private readonly FeederConfiguration _feederConfiguration;
+15	        private readonly IApiHttpClientFactory _apiHttpClientFactory;
+16	
+17	        public ApiService(
+18	            IApiHttpClientFactory apiHttpClientFactory,
+19	            ApiConfiguration apiConfiguration,
+20	            FeederConfiguration feederConfiguration)
+21	        {
+22	            _apiConfiguration = apiConfiguration;
+23	            _feederConfiguration = feederConfiguration;
+24	            _apiHttpClientFactory = apiHttpClientFactory;
+25	        }
+26	
+27	        public Task CreateAnimalFeederAsync(AnimalFeederCreationDto animalFeeder, CancellationToken cancellationToken = default)
+28	        {
+29	            if (string.IsNullOrEmpty(_apiConfiguration.BaseUrl) || string.IsNullOrEmpty(_apiConfiguration.AccessToken))
+30	            {
+31	                throw new ArgumentException(NotConfiguredExceptionMessage);
+32	            }
+33	
+34	            var client = _apiHttpClientFactory.CreateHttpClient();
+35	            return client.PostAsync(_apiConfiguration.AnimalFeederEndpoint, JsonContent.Create(animalFeeder), cancellationToken);
+36	        }
+37	
+38	        public Task CreateFeederAsync(double latitude, double longitude, CancellationToken cancellationToken = default)
+39	        {
+40	            if (string.IsNullOrEmpty(_apiConfiguration.BaseUrl) || string.IsNullOrEmpty(_apiConfiguration.AccessToken))
+41	            {
+42	                throw new ArgumentException(NotConfiguredExceptionMessage);
+43	            }
+44	
+45	            var client = _apiHttpClientFactory.CreateHttpClient();
+46	            return client.PostAsync(_apiConfiguration.AnimalFeederEndpoint, JsonContent.Create(
+47	                new GeoPoint(latitude, longitude)
+48	                ), cancellationToken);
+49	        }
+50	
+51	        public async Task<FeederDto?> GetFeederDtoAsync(CancellationToken cancellationToken = default)
+52	        {
+53	            if (string.IsNullOrEmpty(_apiConfiguration.BaseUrl) || string.IsNullOrEmpty(_apiConfiguration.AccessToken))
+54	            {
+55	                throw new ArgumentException(NotConfiguredExceptionMessage);
+56	            }
+57	
+58	            var client = _apiHttpClientFactory.CreateHttpClient();
+59	            var feeders = await client.GetFromJsonAsync<IEnumerable<FeederDto>>($"{_apiConfiguration.FeederByCoordinatesEndpoint}?coordinates={_feederConfiguration.Latitude} {_feederConfiguration.Longitude}", cancellationToken);
+60	            return feeders?.FirstOrDefault();
+61	        }
+62	    }
+63	}

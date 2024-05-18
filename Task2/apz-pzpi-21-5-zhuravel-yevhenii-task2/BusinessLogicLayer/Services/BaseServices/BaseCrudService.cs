@@ -13,7 +13,7 @@ namespace BusinessLogicLayer.Services.BaseServices
 {
     public class BaseCrudService<T, TIdDto, TDetailedDto, TCreateDto, TUpdateDto, TIdAttribute> : ICrudService<T, TIdDto, TDetailedDto, TCreateDto, TUpdateDto>
         where TIdAttribute : Attribute
-        where T : ICloneable
+        where T : class, ICloneable
     {
         protected readonly IMapper _mapper;
         protected readonly IUnitOfWork _unitOfWork;

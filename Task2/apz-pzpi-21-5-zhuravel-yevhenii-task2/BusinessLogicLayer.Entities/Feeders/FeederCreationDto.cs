@@ -1,14 +1,15 @@
-﻿using DataAccessLayer.Entities;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using BusinessLogicLayer.Entities.GeoPoints;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace BusinessLogicLayer.Entities.Feeders
 {
     public class FeederCreationDto
     {
         [Key]
+        [JsonIgnore]
         public Guid Id { get; set; } = Guid.NewGuid();
-        public GeoPoint Location { get; set; } = null!;
+        public GeoPointCreationDto Location { get; set; } = null!;
         public Guid AnimalCenterId { get; set; }
     }
 }

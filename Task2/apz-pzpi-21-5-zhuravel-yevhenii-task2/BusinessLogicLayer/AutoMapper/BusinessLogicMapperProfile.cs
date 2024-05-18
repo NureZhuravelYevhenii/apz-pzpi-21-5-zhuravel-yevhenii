@@ -4,6 +4,7 @@ using BusinessLogicLayer.Entities.AnimalFeeders;
 using BusinessLogicLayer.Entities.Animals;
 using BusinessLogicLayer.Entities.AnimalTypes;
 using BusinessLogicLayer.Entities.Feeders;
+using BusinessLogicLayer.Entities.GeoPoints;
 using BusinessLogicLayer.Entities.Sensors;
 using BusinessLogicLayer.Entities.SensorTypes;
 using DataAccessLayer.Entities;
@@ -50,6 +51,11 @@ namespace BusinessLogicLayer.AutoMapper
             CreateMap<SensorType, SensorTypeCreationDto>().ReverseMap();
             CreateMap<SensorType, SensorTypeIdDto>().ReverseMap();
             CreateMap<SensorType, SensorTypeUpdateDto>().ReverseMap();
+
+            CreateMap<GeoPoint, GeoPointDto>().ReverseMap();
+            CreateMap<GeoPoint, GeoPointCreationDto>().ReverseMap();
+            CreateMap<GeoPoint, GeoPointIdDto>().ReverseMap();
+            CreateMap<GeoPoint, GeoPointUpdateDto>().ReverseMap();
         }
     }
 }
